@@ -1,0 +1,46 @@
+name: Build APK
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Cordova
+        run: |
+          npm install -g cordova
+
+      - name: Create Cordova App
+        run: |
+          cordova create app com.monica.energy MonicaEnergy
+          cp -r www/* app/www/
+          cp config.xml app/config.xml
+
+      - name: Add Android Platform
+        run: |
+          cd app
+          cordova platform add android
+
+      - name: Build APK
+        run: |
+          cd app
+          cordova build android
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: MonicaEnergy-APK
+          path: app/platforms/android/app/build/outputs/apk/debug/*.apk

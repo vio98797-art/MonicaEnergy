@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.monica.energy"
+        version="1.0.0"
+        xmlns="http://www.w3.org/ns/widgets"
+        xmlns:cdv="http://cordova.apache.org/ns/1.0">
+
+    <name>Monica Energy</name>
+
+    <description>
+        Monica Energy Credit Ledger
+    </description>
+
+    <author>
+        vio98797-art
+    </author>
+
+    <content src="index.html"/>
+
+    <access origin="*" />
+
+    <preference name="Fullscreen" value="false"/>
+</widget>
