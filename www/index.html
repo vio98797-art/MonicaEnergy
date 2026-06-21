@@ -1,24 +1,174 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Monica Energy</title>
-<link rel="stylesheet" href="css/style.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+    <title>Monica Energy</title>
+    <!-- Tailwind CSS CDN for High-end UI -->
+    <script src="https://tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <style>
+        .page { display: none; }
+        .page.active { display: block; }
+    </style>
 </head>
+<body class="bg-gray-50 text-gray-800 font-sans">
 
-<body>
+    <!-- [ 1. LAUNCH / SPLASH SCREEN ] -->
+    <div id="page-splash" class="page active flex flex-col items-center justify-center h-screen bg-gradient-to-tr from-blue-600 to-indigo-800 text-white">
+        <div class="text-center animate-bounce">
+            <i class="fa-solid fa-bolt text-6xl mb-4 text-yellow-300"></i>
+            <h1 class="text-3xl font-bold tracking-wider">MONICA ENERGY</h1>
+            <p class="text-sm opacity-75 mt-2">Microfinance Ledger System</p>
+        </div>
+    </div>
 
-<h1>Monica Energy</h1>
+    <!-- [ 2. LOGIN SELECTION & FORM ] -->
+    <div id="page-login" class="page p-6 max-w-md mx-auto h-screen flex flex-col justify-center">
+        <div class="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
+            <h2 class="text-2xl font-bold text-center mb-6 text-indigo-700">စနစ်သို့ ဝင်ရောက်ရန်</h2>
+            
+            <div class="flex gap-4 mb-6">
+                <button onclick="switchRole('customer')" id="btn-role-customer" class="flex-1 py-2 rounded-lg font-semibold bg-indigo-600 text-white shadow-md">Customer</button>
+                <button onclick="switchRole('admin')" id="btn-role-admin" class="flex-1 py-2 rounded-lg font-semibold bg-gray-200 text-gray-700">Admin</button>
+            </div>
 
-<div class="card">
-    <h2>Dashboard</h2>
-    <p>Total Customers: <span id="customers">0</span></p>
-    <p>Total Outstanding: <span id="outstanding">0</span></p>
-</div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase">အသုံးပြုသူ အမည် / ID</label>
+                    <input type="text" id="username" class="w-full mt-1 p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase">လျှို့ဝှက်နံပါတ် (Password)</label>
+                    <input type="password" id="password" class="w-full mt-1 p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <button onclick="handleLogin()" class="w-full bg-gradient-to-r from-indigo-600 to-blue-600 text-white p-3 rounded-xl font-bold mt-4 shadow-lg hover:opacity-90">LOG IN</button>
+            </div>
+        </div>
+    </div>
 
-<script src="js/app.js"></script>
+    <!-- [ 3. ADMIN DASHBOARD ] -->
+    <div id="page-admin-dashboard" class="page">
+        <!-- Top Nav -->
+        <div class="bg-indigo-700 text-white p-4 flex justify-between items-center shadow-md">
+            <h1 class="font-bold text-lg"><i class="fa-solid fa-user-shield mr-2"></i>Admin Dashboard</h1>
+            <button onclick="logout()" class="text-sm bg-indigo-800 px-3 py-1 rounded-lg"><i class="fa-solid fa-right-from-bracket"></i></button>
+        </div>
+        
+        <!-- Content -->
+        <div class="p-4 space-y-4">
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-gradient-to-br from-green-500 to-emerald-600 p-4 rounded-xl text-white shadow">
+                    <p class="text-xs opacity-80">စုစုပေါင်း ဖောက်သည်</p>
+                    <h3 class="text-2xl font-bold mt-1">1,240 ဦး</h3>
+                </div>
+                <div class="bg-gradient-to-br from-blue-500 to-indigo-600 p-4 rounded-xl text-white shadow">
+                    <p class="text-xs opacity-80">စုစုပေါင်း ထုတ်ချေးငွေ</p>
+                    <h3 class="text-2xl font-bold mt-1">45.2 M</h3>
+                </div>
+            </div>
 
-</body>
-</html>
+            <!-- Menu Actions -->
+            <div class="bg-white p-4 rounded-xl shadow border space-y-3">
+                <h3 class="font-bold text-gray-600 text-sm border-b pb-2">အမြန်လုပ်ဆောင်ချက်များ</h3>
+                <button onclick="navigateTo('page-new-customer')" class="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100">
+                    <span><i class="fa-solid fa-user-plus text-indigo-600 mr-3"></i>လူသစ်စာရင်းသွင်းရန် (New Customer)</span>
+                    <i class="fa-solid fa-chevron-right text-gray-400"></i>
+                </button>
+                <button onclick="navigateTo('page-customer-search')" class="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100">
+                    <span><i class="fa-solid fa-magnifying-glass text-indigo-600 mr-3"></i>ဖောက်သည် ရှာဖွေရန် (Search)</span>
+                    <i class="fa-solid fa-chevron-right text-gray-400"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- [ 4. NEW CUSTOMER FORM ] -->
+    <div id="page-new-customer" class="page">
+        <div class="bg-indigo-700 text-white p-4 flex items-center gap-3">
+            <button onclick="navigateTo('page-admin-dashboard')"><i class="fa-solid fa-arrow-left text-lg"></i></button>
+            <h1 class="font-bold text-lg">လူသစ်စာရင်းသွင်းရန်</h1>
+        </div>
+        <div class="p-4 space-y-4">
+            <div class="bg-white p-5 rounded-xl shadow space-y-4">
+                <div>
+                    <label class="text-sm font-semibold text-gray-600">အမည် (Name)</label>
+                    <input type="text" id="cust-name" class="w-full mt-1 p-2 border rounded-lg">
+                </div>
+                <div>
+                    <label class="text-sm font-semibold text-gray-600">ဖုန်း / ID (Phone or ID)</label>
+                    <input type="text" id="cust-phone" class="w-full mt-1 p-2 border rounded-lg">
+                </div>
+                <div>
+                    <label class="text-sm font-semibold text-gray-600">စတင်ချေးငွေပမာဏ (Opening Amount)</label>
+                    <input type="number" id="cust-amount" class="w-full mt-1 p-2 border rounded-lg">
+                </div>
+                <button onclick="saveCustomer()" class="w-full bg-green-600 text-white p-3 rounded-lg font-bold shadow">စာရင်းသိမ်းဆည်းမည်</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- [ 5. CUSTOMER HUB / SEARCH & TRANSACTION PANEL ] -->
+    <div id="page-customer-search" class="page">
+        <div class="bg-indigo-700 text-white p-4 flex items-center gap-3">
+            <button onclick="navigateTo('page-admin-dashboard')"><i class="fa-solid fa-arrow-left text-lg"></i></button>
+            <h1 class="font-bold text-lg">ဖောက်သည် ရှာဖွေရေးနှင့် ငွေစာရင်း</h1>
+        </div>
+        <div class="p-4 space-y-4">
+            <div class="flex gap-2">
+                <input type="text" id="search-input" placeholder="ID သို့မဟုတ် ဖုန်းနံပါတ် ရိုက်ပါ..." class="flex-1 p-2 border rounded-lg">
+                <button onclick="searchCustomer()" class="bg-indigo-600 text-white px-4 rounded-lg"><i class="fa-solid fa-magnifying-glass"></i></button>
+            </div>
+
+            <!-- Profile View & Transaction Panel Results (ငွေစာရင်း လုပ်ဆောင်ချက်) -->
+            <div id="search-result" class="bg-white p-5 rounded-xl shadow space-y-4 hidden">
+                <div class="border-b pb-2">
+                    <h3 class="font-bold text-lg text-indigo-700" id="res-name">မောင်မောင်</h3>
+                    <p class="text-sm text-gray-500" id="res-id">ID: CUST-001</p>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-sm bg-gray-50 p-3 rounded-lg">
+                    <div>Opening Balance:</div><div class="font-semibold text-right" id="res-open">1,000,000 MMK</div>
+                    <div class="text-indigo-600 font-bold">Current Balance:</div><div class="font-bold text-right text-indigo-600" id="res-current">800,000 MMK</div>
+                </div>
+
+                <!-- Transaction Actions -->
+                <div class="grid grid-cols-2 gap-2 pt-2">
+                    <button onclick="openTransactionModal('repayment')" class="bg-emerald-600 text-white py-2 rounded-lg font-semibold text-sm"><i class="fa-solid fa-hand-holding-dollar mr-1"></i> Repayment (ပြန်ဆပ်)</button>
+                    <button onclick="openTransactionModal('recredit')" class="bg-blue-600 text-white py-2 rounded-lg font-semibold text-sm"><i class="fa-solid fa-money-bill-trend-up mr-1"></i> Re-credit (ပြန်ထုတ်)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cordova Core & Logic Script -->
+    <script src="cordova.js"></script>
+    <script>
+        // Splash Screen Router Logic
+        document.addEventListener('deviceready', function() {
+            setTimeout(function() {
+                navigateTo('page-login');
+            }, 2500); // Splash screen ပြသမည့်အချိန် ၂.၅ စက္ကန့်
+        }, false);
+
+        let currentRole = 'customer';
+
+        function navigateTo(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        function switchRole(role) {
+            currentRole = role;
+            document.getElementById('btn-role-customer').className = role === 'customer' ? 'flex-1 py-2 rounded-lg font-semibold bg-indigo-600 text-white shadow-md' : 'flex-1 py-2 rounded-lg font-semibold bg-gray-200 text-gray-700';
+            document.getElementById('btn-role-admin').className = role === 'admin' ? 'flex-1 py-2 rounded-lg font-semibold bg-indigo-600 text-white shadow-md' : 'flex-1 py-2 rounded-lg font-semibold bg-gray-200 text-gray-700';
+        }
+
+        function handleLogin() {
+            if (currentRole === 'admin') {
+                navigateTo('page-admin-dashboard');
+            } else {
+                // Customer Mode သို့ သွားရန် 
+                navigateTo('page-customer-search'); 
 

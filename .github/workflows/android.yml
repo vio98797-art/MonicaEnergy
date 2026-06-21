@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -22,28 +22,28 @@ jobs:
       - name: Install Cordova
         run: npm install -g cordova
 
-      - name: Create Cordova App
+      - name: Create Cordova Project Structure
         run: |
-          cordova create app com.monica.energy MonicaEnergy
-          cp -r www/* app/www/
-          cp config.xml app/config.xml
+          # လက်ရှိ ရှိပြီးသား ဖိုင်များကို မထိခိုက်စေဘဲ Cordova scaffold ဆောက်ခြင်း
+          cordova create cordova_build com.monica.energy MonicaEnergy
+          
+          # သင့်ပရောဂျက်ထဲက www နှင့် config.xml ကို build folder ထဲ ကူးထည့်ခြင်း
+          cp -r www/* cordova_build/www/
+          cp config.xml cordova_build/config.xml || true
 
       - name: Add Android Platform
         run: |
-          cd app
+          cd cordova_build
           cordova platform add android
 
-      - name: Build APK
+      - name: Build Android APK (Debug)
         run: |
-          cd app
-          cordova build android
+          cd cordova_build
+          cordova build android --debug
 
-      - name: Find APK
-        run: |
-          find app -name "*.apk"
-
-      - name: Upload APK
+      - name: Upload Finished APK
         uses: actions/upload-artifact@v4
         with:
           name: MonicaEnergy-APK
-          path: app/**/*.apk
+          path: cordova_build/platforms/android/app/build/outputs/apk/debug/*.apk
+
