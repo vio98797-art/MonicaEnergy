@@ -25,8 +25,8 @@ jobs:
           npm install @capacitor/core @capacitor/android
           npm install -D @capacitor/cli
           
-          # Web Assets Directory ဆောက်ပြီး HTML များ ရွှေ့ခြင်း
-          mkdir www
+          # FIXED: www folder ရှိပြီးသားဖြစ်ပါက ထပ်မဆောက်ဘဲ ကျော်သွားရန် (-p ထည့်ထားသည်)
+          mkdir -p www
           cp *.html www/ || true
           cp *.js www/ || true
           cp *.css www/ || true
