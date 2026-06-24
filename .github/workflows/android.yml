@@ -25,7 +25,7 @@ jobs:
           npm install @capacitor/core @capacitor/android
           npm install -D @capacitor/cli
           
-          # FIXED: www folder ရှိပြီးသားဖြစ်ပါက ထပ်မဆောက်ဘဲ ကျော်သွားရန် (-p ထည့်ထားသည်)
+          # www folder ရှိပြီးသားဖြစ်ပါက ထပ်မဆောက်ဘဲ ကျော်သွားရန်
           mkdir -p www
           cp *.html www/ || true
           cp *.js www/ || true
@@ -35,11 +35,11 @@ jobs:
           npx cap init "Monica Energy" "com.monica.energy" --web-dir=www
           npx cap add android
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: '21' # FIXED: Java 17 မှ 21 သို့ တိုးမြှင့်လိုက်သည်
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
