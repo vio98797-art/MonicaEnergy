@@ -1,7 +1,7 @@
 name: Build Android APK
 on:
   push:
-    branches: [ main, master ] # သင့် main branch ထဲ ကုဒ်တွန်းရင် အလုပ်လုပ်မယ်
+    branches: [ main, master ] # သင့် main သို့မဟုတ် master branch ထဲ ကုဒ်တွန်းရင် အလုပ်လုပ်မယ်
 
 jobs:
   build:
@@ -13,19 +13,25 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-size: '20'
+          node-version: '20'
 
       - name: Install Capacitor & Dependencies
         run: |
+          # Error တက်စေသော package.json အဟောင်းရှိလျှင် အရင်ဖျက်ပစ်ခြင်း
+          rm -f package.json package-lock.json || true
+          
+          # ပတ်ဝန်းကျင်အသစ်တွင် အသစ်ပြန်စခြင်း
           npm init -y
           npm install @capacitor/core @capacitor/android
           npm install -D @capacitor/cli
-          # Web Assets Directory ဆောက်ပြီး HTML များ ရွှေ့ခြင်း (Capacitor လိုအပ်ချက်)
+          
+          # Web Assets Directory ဆောက်ပြီး HTML များ ရွှေ့ခြင်း
           mkdir www
           cp *.html www/ || true
           cp *.js www/ || true
           cp *.css www/ || true
-          # Capacitor Init လုပ်ခြင်း
+          
+          # Capacitor Init နှင့် Android Platform ထည့်ခြင်း
           npx cap init "Monica Energy" "com.monica.energy" --web-dir=www
           npx cap add android
 
