@@ -2,28 +2,33 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<!-- Security Policy ကို ဖွင့်ပေးမည့် Meta Tag -->
+<meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: gap: content: https://gstatic.com; style-src 'self' 'unsafe-inline'; media-src *">
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Monica Energy - Admin Login</title>
 <link rel="stylesheet" href="style.css" />
+<style>
+  /* နှိပ်မရ ဖြစ်နေတာကို ကာကွယ်ရန် Z-Index တင်ခြင်း */
+  button { position: relative; z-index: 9999; }
+</style>
 </head>
 <body>
 <div class="page">
   <div class="brand-bar">
     <div class="brand">
-      <div class="name" data-brand-name>Monica Energy</div>
-      <div class="tag" data-brand-tag>Customer Management Service</div>
+      <div class="name">Monica Energy</div>
     </div>
   </div>
 
   <div class="shell">
     <div class="hero">
       <h2>Admin Log In</h2>
-      <p>Secure offline management console for customer registration, search, repayment, audit, prices and settings.</p>
     </div>
     <div class="section">
       <div class="card section tight" style="max-width:460px;margin:0 auto;">
         <div class="title">Admin Login</div>
-        <form id="loginForm">
+        <!-- Form Tag ကို ဖယ်ပြီး ရိုးရိုး Div နဲ့ စမ်းမည် -->
+        <div id="loginFormArea">
           <div class="field">
             <label>Username</label>
             <input class="input" type="text" id="username" required placeholder="Enter admin username">
@@ -34,32 +39,43 @@
           </div>
           <div id="loginError" class="notice warn hidden"></div>
           <div style="height:12px"></div>
-          <button class="btn primary block" type="submit">Sign In</button>
-        </form>
+          <!-- Type Button သေချာထည့်ထားသည် -->
+          <button class="btn primary block" type="button" id="loginBtn" onclick="doLogin()">Sign In</button>
+        </div>
       </div>
     </div>
-    <div class="footerbar">Offline first • localStorage • Professional dashboard</div>
   </div>
 
 </div>
-<script src="app.js"></script>
+
+<script src="cordova.js"></script>
+<!-- app.js ကို ခဏပိတ်ထားမည် (Error အဓိကတရားခံ ဟုတ်မဟုတ် စစ်ရန်) -->
+<!-- <script src="app.js"></script> -->
 
 <script>
-if(requireAuth() || true){
-  setBrand();
-  document.getElementById('loginForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    const u = document.getElementById('username').value.trim();
-    const p = document.getElementById('password').value.trim();
-    const err = document.getElementById('loginError');
+// အဆင့် ၁ - Script စအလုပ်လုပ်ကြောင်း စစ်ဆေးမည်
+// alert('Step 1: Script Loaded'); 
+
+function doLogin() {
+    // အဆင့် ၂ - ခလုတ်နှိပ်တာ အလုပ်လုပ်လား စစ်ဆေးမည်
+    alert('Button Clicked!'); 
+    
+    var u = document.getElementById('username').value.trim();
+    var p = document.getElementById('password').value.trim();
+    var err = document.getElementById('loginError');
+
     if(u === 'admin' && p === '123456'){
-      localStorage.setItem('me_auth','1');
-      window.location.href='dashboard.html';
-    }else{
-      err.textContent='Username သို့မဟုတ် Password မှားယွင်းနေပါသည်။';
-      err.classList.remove('hidden');
+        alert('Login Success! Redirecting...');
+        localStorage.setItem('me_auth','1');
+        // လမ်းကြောင်းမှန်ကန်စေရန် ./ ထည့်ပေးပါ
+        window.location.href = './dashboard.html';
+    } else {
+        alert('Wrong Password!');
+        if(err) {
+            err.textContent = 'Username သို့မဟုတ် Password မှားယွင်းနေပါသည်။';
+            err.classList.remove('hidden');
+        }
     }
-  });
 }
 </script>
 
