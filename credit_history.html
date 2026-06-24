@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Monica Energy - Credit History</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="page">
+  <div class="brand-bar">
+    <div class="brand">
+      <div class="name" data-brand-name>Monica Energy</div>
+      <div class="tag" data-brand-tag>Customer Management Service</div>
+    </div>
+  </div>
+
+  <div class="shell">
+    <div class="hero">
+      <h2>Credit History</h2>
+      <p>Detailed history with DD/MM/YYYY date format, overdue highlighting and limit status.</p>
+    </div>
+    <div class="section">
+      <div class="top-actions" style="margin-bottom:14px;">
+        <a class="btn secondary" href="search.html">Customer Search</a>
+        <a class="btn secondary" href="repayment.html">Repayment</a>
+        <a class="btn secondary" href="dashboard.html">Dashboard</a>
+      </div>
+
+      <div id="historyHead" class="card section tight"></div>
+
+      <div style="height:14px"></div>
+      <div class="tabs">
+        <button class="tab active" data-view="all">All History</button>
+        <button class="tab" data-view="credit">Credit Only</button>
+        <button class="tab" data-view="repayment">Repayment Only</button>
+        <button class="tab" data-view="overdue">Limit / Long Overdue</button>
+      </div>
+
+      <div style="height:14px"></div>
+      <div id="historyList" class="list-box"></div>
+    </div>
+  </div>
+
+</div>
+<script src="app.js"></script>
+
+<script>
+if(requireAuth()){
+  setBrand();
+  const url = new URL(window.location.href);
+  const customerId = url.searchParams.get('id');
+  let activeView = 'all';
+  const customers = readCustomers();
+  const c = customers.find(x => x.id === customerId);
+
+  if(!c){
+    document.getElementById('historyHead').innerHTML = '<div class="notice warn">Customer not found.</div>';
+  }else{
+    const t = calcTotals(c);
+    const st = creditStatus(c);
+    const first = (c.salesHistory || [])[0]?.date ? new Date((c.salesHistory || [])[0].date) : null;
+    const monthsOld = first ? ((new Date().getFullYear() - first.getFullYear()) * 12 + (new Date().getMonth() - first.getMonth())) : 0;
+    document.getElementById('historyHead').innerHTML = `
+      <div class="grid cols-3">
+        <div class="stat"><span class="k">Name</span><span class="v" style="font-size:18px">${c.name}</span><small>${c.phone || '---'}</small></div>
+        <div class="stat"><span class="k">Balance</span><span class="v">${fmt(t.currentBalance)}</span><small>Current balance</small></div>
+        <div class="stat"><span class="k">Status</span><span class="v">${st.exceeded ? 'LIMIT' : (st.warning ? 'NEAR' : 'OK')}</span><small>${monthsOld >= 3 ? `Age ${monthsOld} months` : 'Normal age'}</small></div>
+      </div>
+      <div style="height:12px"></div>
+      <div class="btn-row">
+        <span class="badge ${st.exceeded ? 'red' : (st.warning ? '' : 'green')}">Credit Limit: ${fmt(st.limit)}</span>
+        <span class="badge">Total Credit: ${fmt(t.totalCredit)}</span>
+        <span class="badge">Total Paid: ${fmt(t.totalPaid)}</span>
+      </div>
+    `;
+  }
+
+  function renderHistory(){
+    const box = document.getElementById('historyList');
+    box.innerHTML = '';
+    if(!c){
+      box.innerHTML = '<div class="list-item">No customer selected.</div>';
+      return;
+    }
+
+    let items = [
+      ...(c.salesHistory || []).map(x => ({...x, type:'credit'})),
+      ...(c.repaymentHistory || []).map(x => ({...x, type:'repayment'}))
+    ].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+    const first = (c.salesHistory || [])[0]?.date ? new Date((c.salesHistory || [])[0].date) : null;
+    const monthsOld = first ? ((new Date().getFullYear() - first.getFullYear()) * 12 + (new Date().getMonth() - first.getMonth())) : 0;
+    const overdue = calcTotals(c).currentBalance > customerLimit(c) || monthsOld >= 3;
+
+    if(activeView === 'credit') items = items.filter(x => x.type === 'credit');
+    if(activeView === 'repayment') items = items.filter(x => x.type === 'repayment');
+    if(activeView === 'overdue') items = items.filter(x => overdue);
+
+    if(!items.length){
+      box.innerHTML = '<div class="list-item">No records for selected view.</div>';
+      return;
+    }
+
+    items.forEach(x => {
+      const row = document.createElement('div');
+      row.className = 'list-item ' + (overdue ? 'overdue' : '');
+      row.innerHTML = x.type === 'repayment'
+        ? `<strong style="color:#68f1b4;">Repayment • -${fmt(x.amount)} ကျပ် ${monthsOld >= 3 ? '<span class="badge red">Long Overdue</span>' : ''}</strong><div class="meta">Note: ${x.note || '—'}<br>Date: ${displayDateTime(x.date)}</div>`
+        : `<strong style="color:#ffd59c;">Credit • +${fmt(x.amount)} ကျပ် ${monthsOld >= 3 ? '<span class="badge red">Long Overdue</span>' : ''}</strong><div class="meta">Fuel: ${x.fuelType || 'Fuel'} • Qty: ${x.qty || '—'}<br>Note: ${x.note || '—'}<br>Date: ${displayDateTime(x.date)}</div>`;
+      box.appendChild(row);
+    });
+  }
+
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeView = btn.dataset.view;
+      renderHistory();
+    });
+  });
+
+  renderHistory();
+}
+</script>
+
+</body>
+</html>

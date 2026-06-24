@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Monica Energy - Customer Registration</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="page">
+  <div class="brand-bar">
+    <div class="brand">
+      <div class="name" data-brand-name>Monica Energy</div>
+      <div class="tag" data-brand-tag>Customer Management Service</div>
+    </div>
+  </div>
+
+  <div class="shell">
+    <div class="hero">
+      <h2>Customer Registration</h2>
+      <p>New customer entry and first credit record. The button text is now clean and professional.</p>
+    </div>
+    <div class="section">
+      <div class="top-actions" style="margin-bottom:14px;">
+        <a class="btn secondary" href="dashboard.html">Dashboard</a>
+        <a class="btn secondary" href="search.html">Customer Search</a>
+        <a class="btn secondary" href="repayment.html">Repayment</a>
+        <a class="btn secondary" href="audit.html">Admin Audit</a>
+        <a class="btn secondary" href="settings.html">App Settings</a>
+      </div>
+
+      <div class="grid cols-2">
+        <div class="card section tight">
+          <div class="title">New Customer Registration</div>
+          <form id="regForm">
+            <div class="field"><label>Customer Name</label><input class="input" type="text" id="regName" required placeholder="Customer name"></div>
+            <div class="field"><label>Phone Number</label><input class="input" type="tel" id="regPhone" placeholder="Optional"></div>
+            <div class="field"><label>Fuel Type</label>
+              <select id="regFuelType">
+                <option value="Octane 92">Octane 92</option>
+                <option value="Octane 95">Octane 95</option>
+                <option value="Diesel">Diesel</option>
+                <option value="Premium Diesel">Premium Diesel</option>
+              </select>
+            </div>
+            <div class="field"><label>Fuel Quantity</label><input class="input" type="text" id="regQty" required placeholder="Example 5 gallons"></div>
+            <div class="field"><label>Credit Amount</label><input class="input" type="number" id="regAmount" required placeholder="Amount"></div>
+            <div class="field"><label>Note</label><textarea id="regNote" placeholder="Vehicle number or remarks"></textarea></div>
+            <div id="regNotice" class="notice hidden"></div>
+            <button class="btn primary block" type="submit">Customer Registration</button>
+          </form>
+        </div>
+
+        <div class="card section tight">
+          <div class="title">Quick Links</div>
+          <div class="btn-row">
+            <a class="btn secondary" href="dashboard.html">Dashboard</a>
+            <a class="btn secondary" href="search.html">Customer Search</a>
+            <a class="btn secondary" href="repayment.html">Repayment</a>
+            <a class="btn secondary" href="audit.html">Admin Audit</a>
+            <a class="btn secondary" href="settings.html">App Settings</a>
+          </div>
+          <div class="hr"></div>
+          <div class="notice">Records are stored locally and can be used offline.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script src="app.js"></script>
+
+<script>
+if(requireAuth()){
+  setBrand();
+  document.getElementById('regForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const list = readCustomers();
+    const name = document.getElementById('regName').value.trim();
+    const phone = document.getElementById('regPhone').value.trim() || '---';
+    const fuelType = document.getElementById('regFuelType').value;
+    const qty = document.getElementById('regQty').value.trim();
+    const amount = parseFloat(document.getElementById('regAmount').value) || 0;
+    const note = document.getElementById('regNote').value.trim();
+    const date = new Date().toISOString();
+
+    const customer = ensureCustomerShape({
+      id:'cust_' + Date.now(),
+      name, phone,
+      totalCredit: amount,
+      totalPaid: 0,
+      salesHistory:[{ date, fuelType, qty, amount, note }],
+      repaymentHistory:[]
+    });
+
+    list.push(customer);
+    saveCustomers(list);
+
+    const status = creditStatus(customer);
+    const notice = document.getElementById('regNotice');
+    notice.classList.remove('hidden');
+    notice.className = 'notice ' + (status.exceeded ? 'warn' : 'ok');
+    notice.textContent = status.exceeded
+      ? `Credit limit exceeded. Balance ${fmt(customer.currentBalance)} is above limit ${fmt(status.limit)}.`
+      : 'Customer Registration saved successfully.';
+
+    alert('Customer Registration saved.');
+    this.reset();
+  });
+}
+</script>
+
+</body>
+</html>

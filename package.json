@@ -1,0 +1,45 @@
+{// ကုဒ်ကို ပိုပြီး စိတ်ချရအောင် window.onload ထဲ ထည့်ရေးခြင်း ဖြစ်ပါတယ်
+window.onload = function() {
+    const formElement = document.getElementById('loginForm');
+    
+    if (formElement) {
+        formElement.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const usernameInput = document.getElementById('username').value.trim();
+            const passwordInput = document.getElementById('password').value.trim();
+            const errorMsg = document.getElementById('errorMessage');
+
+            const adminUser = "admin";
+            const adminPass = "123456";
+
+            if (usernameInput === adminUser && passwordInput === adminPass) {
+                errorMsg.style.display = 'none';
+                alert('လော့ဂ်အင် ဝင်ရောက်မှု အောင်မြင်ပါသည်။');
+                window.location.href = "search.html"; 
+            } else {
+                errorMsg.textContent = "Username သို့မဟုတ် Password မှားယွင်းနေပါသည်။";
+                errorMsg.style.display = 'block';
+            }
+        });
+    }
+};
+
+  "name": "monicaenergy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.108.2",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "vite": "^8.0.16"
+  }
+}

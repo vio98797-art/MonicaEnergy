@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Monica Energy - Dashboard</title>
+<link rel="stylesheet" href="style.css" />
+<style>
+  body{
+    background:
+      radial-gradient(circle at top left, rgba(245,176,76,.08), transparent 20%),
+      radial-gradient(circle at right center, rgba(128,110,255,.07), transparent 18%),
+      linear-gradient(180deg,#09101d 0%, #08101c 100%);
+  }
+  .dashboard-wrap{
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 12px 10px 22px;
+  }
+  .brand-bar{
+    justify-content:center !important;
+    align-items:center !important;
+    text-align:center;
+    margin: 10px 0 12px;
+  }
+  .brand{
+    align-items:center;
+    text-align:center;
+    width:100%;
+  }
+  .brand .name{
+    font-size: 34px;
+    letter-spacing: 1.5px;
+    text-shadow: 0 4px 14px rgba(0,0,0,.45);
+  }
+  .brand .tag{
+    color:#9ca9bf;
+    font-size:16px;
+    font-weight:700;
+    margin-top:4px;
+  }
+  .shell.dashboard-clean{
+    background:
+      radial-gradient(circle at top right, rgba(255,255,255,.04), transparent 18%),
+      linear-gradient(180deg, rgba(15,22,37,.98), rgba(10,15,25,.98));
+    border:1px solid rgba(245,176,76,.10);
+    padding: 14px 12px 18px;
+  }
+  .menu-grid{
+    display:grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  .panel-card{
+    padding: 16px;
+    border-radius: 22px;
+    background: linear-gradient(180deg, rgba(12,18,30,.96), rgba(9,14,25,.96));
+    border: 1px solid rgba(110,124,156,.32);
+    box-shadow: 0 16px 30px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.02);
+  }
+  .panel-title{
+    font-size: 20px;
+    line-height: 1.05;
+    font-weight: 900;
+    color: #e8edf7;
+    margin: 2px 0 14px;
+    min-height: 48px;
+  }
+  .menu-btn{
+    width: 100%;
+    display:flex;
+    align-items:flex-start;
+    justify-content:flex-start;
+    flex-direction:column;
+    gap: 6px;
+    min-height: 120px;
+    padding: 18px 16px;
+    border-radius: 18px;
+    text-align:left;
+    text-decoration:none;
+    border: 1px solid rgba(255,255,255,.14);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.15),
+      0 16px 26px rgba(0,0,0,.20);
+    transition: transform .15s ease, filter .15s ease;
+  }
+  .menu-btn:hover{ transform: translateY(-1px); filter: brightness(1.03); }
+  .menu-btn .big{
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: .1px;
+  }
+  .menu-btn .sub{
+    font-size: 13px;
+    line-height: 1.25;
+    color: rgba(255,255,255,.88);
+    font-weight: 600;
+    max-width: 180px;
+  }
+  .menu-btn.blue{
+    background: linear-gradient(135deg, rgba(176,208,242,.86), rgba(120,149,180,.82));
+    color: #2d3442;
+  }
+  .menu-btn.green{
+    background: linear-gradient(135deg, rgba(159,220,177,.86), rgba(111,166,136,.82));
+    color: #24352c;
+  }
+  .menu-btn.purple{
+    background: linear-gradient(135deg, rgba(198,167,215,.86), rgba(149,128,174,.82));
+    color: #35293d;
+  }
+  .menu-btn.gray{
+    background: linear-gradient(135deg, rgba(196,203,212,.86), rgba(137,146,156,.82));
+    color: #2e3137;
+  }
+  .menu-btn.gold{
+    background: linear-gradient(90deg, rgba(233,200,104,.92), rgba(170,125,32,.90) 45%, rgba(244,214,135,.92));
+    color: #372700;
+  }
+  .menu-btn.brown{
+    background: linear-gradient(90deg, rgba(201,150,106,.92), rgba(133,82,46,.92));
+    color: #341d10;
+  }
+  .menu-btn.red{
+    background: linear-gradient(90deg, rgba(193,97,79,.92), rgba(149,67,53,.92));
+    color: #2a0f0b;
+  }
+  .full-row{
+    grid-column: 1 / -1;
+  }
+  .logout-wrap{
+    display:flex;
+    justify-content:center;
+    margin-top: 16px;
+  }
+  .logout-btn{
+    width: 220px;
+    min-height: 72px;
+    border-radius: 18px;
+    font-size: 20px;
+    font-weight: 900;
+    background: linear-gradient(180deg, rgba(165,82,72,.96), rgba(121,55,49,.96));
+    color: #f8f3f1;
+    border:1px solid rgba(255,191,191,.25);
+  }
+  @media (max-width: 640px){
+    .brand .name{font-size: 30px;}
+    .brand .tag{font-size: 15px;}
+    .panel-title{font-size: 18px; min-height: auto;}
+    .menu-btn{min-height: 112px;}
+    .menu-btn .big{font-size: 18px;}
+    .menu-btn .sub{font-size: 12px;}
+    .logout-btn{width: 190px;}
+  }
+</style>
+</head>
+<body>
+<div class="page dashboard-wrap">
+  <div class="brand-bar brand-center">
+    <div class="brand">
+      <div class="name" data-brand-name>Monica Energy</div>
+      <div class="tag" data-brand-tag>Customer Management Service</div>
+    </div>
+  </div>
+
+  <div class="shell dashboard-clean">
+    <div class="menu-grid">
+      <div class="panel-card">
+        <div class="panel-title">Customer<br>Operations</div>
+        <a class="menu-btn blue" href="ledger_view.html">
+          <span class="big">Customer Registration</span>
+          <span class="sub">Add new profiles</span>
+        </a>
+        <div style="height:14px"></div>
+        <a class="menu-btn green" href="search.html">
+          <span class="big">Customer Search</span>
+          <span class="sub">Find customer records</span>
+        </a>
+      </div>
+
+      <div class="panel-card">
+        <div class="panel-title">System Admin<br>&amp; Exit</div>
+        <a class="menu-btn purple" href="audit.html">
+          <span class="big">Admin Audit</span>
+          <span class="sub">Review user actions</span>
+        </a>
+        <div style="height:14px"></div>
+        <a class="menu-btn gray" href="settings.html">
+          <span class="big">App Settings</span>
+          <span class="sub">Adjust app preferences</span>
+        </a>
+      </div>
+
+      <div class="panel-card full-row">
+        <div class="panel-title">Financial Tools</div>
+        <a class="menu-btn gold" href="repayment.html">
+          <span class="big">Repayment</span>
+          <span class="sub">Process payments</span>
+        </a>
+        <div style="height:14px"></div>
+        <a class="menu-btn brown" href="prices.html">
+          <span class="big">Fuel Prices</span>
+          <span class="sub">Update fuel costs</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="logout-wrap">
+      <button class="btn red logout-btn" id="logoutBtn" type="button">Logout</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script>
+if(requireAuth()){
+  setBrand();
+  document.getElementById('logoutBtn').addEventListener('click', function(){
+    localStorage.removeItem('me_auth');
+    window.location.href='index.html';
+  });
+}
+</script>
+</body>
+</html>

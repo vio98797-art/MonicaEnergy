@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Monica Energy - Customer Search</title>
+<style>
+/* Combined styles for standalone preview */
+:root{--bg-main:#090d16;--bg-card:#131c2e;--bg-input:#060a12;--text-primary:#f8fafc;--text-secondary:#94a3b8;--accent-gold:#f59e0b;--accent-crimson:#e11d48;--success-emerald:#10b981}
+*{box-sizing:border-box;margin:0;padding:0;font-family:sans-serif}
+body{background:var(--bg-main);color:var(--text-primary);padding:20px 16px;min-height:100vh}
+.page{max-width:860px;margin:0 auto}
+.brand-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.brand .name{font-size:24px;font-weight:bold;color:var(--accent-gold)}
+.brand .tag{font-size:12px;color:var(--text-secondary)}
+.top-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.btn{background:#131c2e;color:var(--text-primary);padding:10px 16px;border-radius:8px;text-decoration:none;font-size:14px;border:1px solid #22314d;cursor:pointer;font-weight:bold;}
+.btn.secondary{color:var(--accent-gold);border-color:rgba(245,158,11,.2)}
+.btn.primary{background:var(--accent-gold);color:#000;border-color:var(--accent-gold)}
+.btn.green{background:var(--success-emerald);color:#000;border-color:var(--success-emerald)}
+.btn.red{background:var(--accent-crimson);color:#fff;border-color:var(--accent-crimson)}
+.btn.block{display:block;width:100%;text-align:center;}
+.card{background:var(--bg-card);padding:24px;border-radius:16px;border:1px solid rgba(245,158,11,.08);margin-bottom:20px}
+.card .title{font-size:18px;font-weight:bold;color:var(--accent-gold);margin-bottom:16px;padding-left:10px;border-left:3px solid var(--accent-gold)}
+.field{margin-bottom:16px}
+.field label{display:block;margin-bottom:6px;font-size:13px;color:var(--text-secondary)}
+.input, select, textarea{width:100%;background:var(--bg-input);color:var(--text-primary);border:1px solid #22314d;padding:12px;border-radius:8px;font-size:14px}
+.grid{display:grid;gap:16px}
+.cols-2{grid-template-columns:1fr 1fr}
+.cols-3{grid-template-columns:repeat(3,1fr)}
+.stat{background:#0b1220;border:1px solid #22314d;border-radius:12px;padding:16px;text-align:center}
+.stat .k{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:6px}
+.stat .v{font-size:20px;font-weight:bold}
+.stat small{display:block;font-size:11px;color:var(--text-secondary);margin-top:6px}
+.customer-card{background:#0b1220;border:1px solid #22314d;padding:16px;border-radius:12px;cursor:pointer;transition:border-color 0.2s}
+.customer-card:hover{border-color:var(--accent-gold)}
+.customer-card.alert{border-color:var(--accent-crimson)}
+.customer-card h3{display:flex;justify-content:space-between;font-size:16px;margin-bottom:8px}
+.customer-card h3 .balance{color:var(--accent-gold)}
+.customer-card p{font-size:13px;color:var(--text-secondary);margin-bottom:6px}
+.badge{display:inline-block;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:bold;background:#22314d;color:var(--text-primary)}
+.badge.red{background:rgba(225,29,72,.2);color:var(--accent-crimson)}
+.badge.green{background:rgba(16,185,129,.2);color:var(--success-emerald)}
+.list-item{background:var(--bg-input);padding:12px;border-radius:8px;border:1px solid #22314d;margin-bottom:8px;font-size:13px}
+.list-item .meta{color:var(--text-secondary);margin-top:4px}
+.hidden{display:none !important}
+@media (max-width:640px){.cols-2,.cols-3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="brand-bar">
+    <div class="brand">
+      <div class="name" data-brand-name>Monica Energy</div>
+      <div class="tag" data-brand-tag>Customer Management Service</div>
+    </div>
+  </div>
+
+  <div class="shell">
+    <div class="hero" style="margin-bottom: 24px;">
+      <h2>Customer Search</h2>
+      <p style="color: var(--text-secondary); font-size: 14px; margin-top: 8px;">Search by name, phone, or id. Open a profile to see current balance, credit limit, and history.</p>
+    </div>
+    <div class="section">
+      <div class="top-actions" style="margin-bottom:14px;">
+        <a class="btn secondary" href="dashboard.html">Dashboard</a>
+        <a class="btn secondary" href="ledger_view.html">Customer Registration</a>
+        <a class="btn secondary" href="repayment.html">Repayment</a>
+        <a class="btn secondary" href="audit.html">Admin Audit</a>
+      </div>
+
+      <div class="card section tight">
+        <div class="title">Search</div>
+        <div class="field"><input class="input" type="text" id="searchBar" placeholder="Search by customer name or phone"></div>
+        <div id="searchResults"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="profileModal" class="hidden" style="position:fixed;inset:0;background:rgba(3,7,15,.92);padding:18px;overflow:auto;z-index:40;">
+    <div class="page" style="padding-top:36px;">
+      <div class="panel" style="max-width:860px;margin:0 auto;">
+        <div class="section">
+          <div class="brand-bar" style="margin-top:0;">
+            <div class="brand"><div class="name" data-brand-name>Monica Energy</div><div class="tag" data-brand-tag>Customer Management Service</div></div>
+            <button class="btn red" id="closeProfileBtn" type="button">Close</button>
+          </div>
+
+          <div class="grid cols-3">
+            <div class="stat"><span class="k">Current Balance</span><span id="statBalance" class="v">0</span><small>Remaining debt</small></div>
+            <div class="stat"><span class="k">Credit Limit</span><span id="statLimit" class="v">0</span><small>Admin set</small></div>
+            <div class="stat"><span class="k">Status</span><span id="statStatus" class="v">OK</span><small>Limit alert</small></div>
+          </div>
+
+          <div style="height:16px"></div>
+          <div class="grid cols-2">
+            <div class="card section tight">
+              <div class="title">Profile</div>
+              <div class="field"><label>Name</label><input class="input" type="text" id="editName"></div>
+              <div class="field"><label>Phone</label><input class="input" type="text" id="editPhone"></div>
+              <div class="btn-row" style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn secondary" id="saveProfileBtn" type="button">Save Profile</button>
+                <button class="btn secondary" id="openCreditHistoryBtn" type="button">Credit History</button>
+                <button class="btn secondary" id="openRepaymentBtn" type="button">Repayment</button>
+              </div>
+            </div>
+
+            <div class="card section tight">
+              <div class="title">Add Credit</div>
+              <div class="field">
+                <label>Fuel Type</label>
+                <select id="addFuelType">
+                  <option value="Octane 92">Octane 92</option>
+                  <option value="Octane 95">Octane 95</option>
+                  <option value="Diesel">Diesel</option>
+                  <option value="Premium Diesel">Premium Diesel</option>
+                </select>
+              </div>
+              <div class="field"><label>Quantity</label><input class="input" type="text" id="addQty"></div>
+              <div class="field"><label>Amount</label><input class="input" type="number" id="addAmount"></div>
+              <div class="field"><label>Note</label><input class="input" type="text" id="addNote"></div>
+              <button class="btn green block" id="saveCreditBtn" type="button">Add Credit</button>
+            </div>
+          </div>
+
+          <div style="height:16px"></div>
+          <div class="card section tight">
+            <div class="title">Summary History</div>
+            <div id="historyList" class="list-box"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Mocked app.js functionality for standalone preview purposes
+const STORAGE_KEY = 'monica_customers';
+
+function readCustomers() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch (e) { return []; }
+}
+function writeCustomers(list) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+}
+function normalizePhone(v) {
+  return String(v || '').replace(/[^\d+]/g, '');
+}
+function calcTotals(customer) {
+  const totalCredit = Number(customer.totalCredit || 0);
+  const totalPaid = Number(customer.totalPaid || 0);
+  const currentBalance = Math.max(0, totalCredit - totalPaid);
+  return { totalCredit, totalPaid, currentBalance };
+}
+function ensureCustomerShape(c) {
+  const totalCredit = Number(c.totalCredit || 0);
+  const totalPaid = Number(c.totalPaid || 0);
+  const currentBalance = Math.max(0, totalCredit - totalPaid);
+  return {
+    id: c.id || ('cust_' + Date.now()),
+    name: c.name || '',
+    phone: c.phone || '---',
+    totalCredit, totalPaid, currentBalance,
+    salesHistory: Array.isArray(c.salesHistory) ? c.salesHistory : [],
+    repaymentHistory: Array.isArray(c.repaymentHistory) ? c.repaymentHistory : []
+  };
+}
+function saveCustomers(list) {
+  writeCustomers(list.map(ensureCustomerShape));
+}
+function creditStatus(customer) {
+  const t = calcTotals(customer);
+  const limit = 50000; // Mock setting
+  return { limit, exceeded: t.currentBalance > limit, warning: t.currentBalance > limit * 0.8 };
+}
+function requireAuth() { return true; }
+function setBrand() {}
+function fmt(n) { return Number(n || 0).toLocaleString(); }
+function formatMoney(n) { return fmt(n) + ' ကျပ်'; }
+function displayDateTime(d) {
+  if(!d) return '';
+  const date = new Date(d);
+  return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+}
+
+// Generate some dummy data for preview if empty
+if(readCustomers().length === 0) {
+    saveCustomers([
+        { id: '1', name: 'Aung Aung', phone: '09444444444', totalCredit: 25000, totalPaid: 5000 },
+        { id: '2', name: 'Kyaw Kyaw', phone: '09777777777', totalCredit: 60000, totalPaid: 0 },
+        { id: '3', name: 'Zaw Zaw', phone: '09999999999', totalCredit: 10000, totalPaid: 10000 }
+    ]);
+}
+
+// ==========================================
+// SEARCH LOGIC START
+// ==========================================
+
+if(requireAuth()){
+  setBrand();
+  let customerList = [];
+  let activeCustomerId = null;
+
+  function buildCard(c){
+    const t = calcTotals(c);
+    const st = creditStatus(c);
+    return `
+      <div class="customer-card ${st.exceeded ? 'alert' : ''}">
+        <h3><span>${c.name || '---'}</span><span class="balance">${formatMoney(t.currentBalance)}</span></h3>
+        <p>Phone: ${c.phone || '---'}</p>
+        <p>Credit Limit: ${fmt(st.limit)} • Total Credit: ${fmt(t.totalCredit)} • Total Paid: ${fmt(t.totalPaid)}</p>
+        <p>${st.exceeded ? '<span class="badge red">LIMIT EXCEEDED</span>' : (st.warning ? '<span class="badge">NEAR LIMIT</span>' : '<span class="badge green">NORMAL</span>')}</p>
+      </div>
+    `;
+  }
+
+  function renderList(list){
+    const out = document.getElementById('searchResults');
+    out.innerHTML = '';
+    if(!list.length){
+      out.innerHTML = '<div style="color:var(--text-secondary); padding: 12px 0;">No customer found.</div>';
+      return;
+    }
+    list.forEach(c => {
+      const wrap = document.createElement('div');
+      wrap.style.marginBottom = '12px';
+      wrap.innerHTML = buildCard(c);
+      wrap.addEventListener('click', () => openProfile(c.id));
+      out.appendChild(wrap);
+    });
+  }
+
+  function refresh(){
+    customerList = readCustomers();
+    const q = document.getElementById('searchBar').value.trim().toLowerCase();
+    
+    // If search is empty, show everyone
+    if(!q){ 
+        renderList(customerList); 
+        return; 
+    }
+    
+    const pn = normalizePhone(q);
+
+    // FIXED: Now we check if pn actually has numbers before falling back to `false`
+    renderList(customerList.filter(c => {
+      const matchName = String(c.name || '').toLowerCase().includes(q);
+      const matchId = String(c.id || '').toLowerCase().includes(q);
+      const matchPhone = pn !== '' ? normalizePhone(c.phone).includes(pn) : false;
+      
+      return matchName || matchPhone || matchId;
+    }));
+  }
+
+  function openProfile(id){
+    customerList = readCustomers();
+    activeCustomerId = id;
+    const c = customerList.find(x => x.id === id);
+    if(!c) return;
+    const t = calcTotals(c);
+    const st = creditStatus(c);
+    document.getElementById('editName').value = c.name || '';
+    document.getElementById('editPhone').value = c.phone || '';
+    document.getElementById('statBalance').textContent = fmt(t.currentBalance);
+    document.getElementById('statLimit').textContent = fmt(st.limit);
+    document.getElementById('statStatus').textContent = st.exceeded ? 'LIMIT' : (st.warning ? 'WARNING' : 'OK');
+
+    const history = [...(c.salesHistory || []).map(x => ({...x, type:'credit'})), ...(c.repaymentHistory || []).map(x => ({...x, type:'repayment'}))].sort((a,b) => new Date(b.date) - new Date(a.date));
+    const box = document.getElementById('historyList');
+    box.innerHTML = '';
+    
+    if(history.length === 0) {
+       box.innerHTML = '<div style="color:var(--text-secondary)">No history found</div>';
+    } else {
+        history.forEach(h => {
+          const item = document.createElement('div');
+          item.className = 'list-item';
+          if(h.type === 'credit'){
+            item.innerHTML = `<strong style="color:#ffd59c;">${h.fuelType || 'Fuel'} • +${fmt(h.amount)} ကျပ်</strong><div class="meta">${h.qty || ''} • ${h.note || 'No note'}<br>${displayDateTime(h.date)}</div>`;
+          }else{
+            item.innerHTML = `<strong style="color:#68f1b4;">Repayment • -${fmt(h.amount)} ကျပ်</strong><div class="meta">${h.note || 'No note'}<br>${displayDateTime(h.date)}</div>`;
+          }
+          box.appendChild(item);
+        });
+    }
+
+    document.getElementById('profileModal').classList.remove('hidden');
+  }
+
+  function closeProfile(){ document.getElementById('profileModal').classList.add('hidden'); }
+
+  document.getElementById('closeProfileBtn').addEventListener('click', closeProfile);
+
+  document.getElementById('saveProfileBtn').addEventListener('click', function(){
+    if(!activeCustomerId) return;
+    const name = document.getElementById('editName').value.trim();
+    const phone = document.getElementById('editPhone').value.trim() || '---';
+    if(!name){ alert('Name is required.'); return; }
+    const list = readCustomers();
+    const idx = list.findIndex(x => x.id === activeCustomerId);
+    if(idx === -1) return;
+    list[idx].name = name;
+    list[idx].phone = phone;
+    saveCustomers(list);
+    alert('Profile saved.');
+    refresh();
+    openProfile(activeCustomerId);
+  });
+
+  document.getElementById('saveCreditBtn').addEventListener('click', function(){
+    if(!activeCustomerId) return;
+    const list = readCustomers();
+    const idx = list.findIndex(x => x.id === activeCustomerId);
+    if(idx === -1) return;
+    const fuelType = document.getElementById('addFuelType').value;
+    const qty = document.getElementById('addQty').value.trim();
+    const amount = parseFloat(document.getElementById('addAmount').value) || 0;
+    const note = document.getElementById('addNote').value.trim();
+    if(!qty){ alert('Quantity required.'); return; }
+    if(amount <= 0){ alert('Amount required.'); return; }
+    list[idx].salesHistory = list[idx].salesHistory || [];
+    list[idx].salesHistory.push({ date:new Date().toISOString(), fuelType, qty, amount, note });
+    list[idx].totalCredit = Number(list[idx].totalCredit || 0) + amount;
+    list[idx] = ensureCustomerShape(list[idx]);
+    saveCustomers(list);
+    const st = creditStatus(list[idx]);
+    alert(st.exceeded ? 'Credit limit exceeded.' : 'Credit added.');
+    refresh();
+    openProfile(activeCustomerId);
+    document.getElementById('addQty').value = '';
+    document.getElementById('addAmount').value = '';
+    document.getElementById('addNote').value = '';
+  });
+
+  document.getElementById('openCreditHistoryBtn').addEventListener('click', function(){
+    if(activeCustomerId) window.location.href = 'credit_history.html?id=' + encodeURIComponent(activeCustomerId);
+  });
+  document.getElementById('openRepaymentBtn').addEventListener('click', function(){
+    if(activeCustomerId) window.location.href = 'repayment.html?id=' + encodeURIComponent(activeCustomerId);
+  });
+
+  document.getElementById('searchBar').addEventListener('input', refresh);
+  
+  // Initial load
+  refresh();
+}
+</script>
+</body>
+</html>

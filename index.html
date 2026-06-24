@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Monica Energy - Admin Login</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="page">
+  <div class="brand-bar">
+    <div class="brand">
+      <div class="name" data-brand-name>Monica Energy</div>
+      <div class="tag" data-brand-tag>Customer Management Service</div>
+    </div>
+  </div>
+
+  <div class="shell">
+    <div class="hero">
+      <h2>Admin Log In</h2>
+      <p>Secure offline management console for customer registration, search, repayment, audit, prices and settings.</p>
+    </div>
+    <div class="section">
+      <div class="card section tight" style="max-width:460px;margin:0 auto;">
+        <div class="title">Admin Login</div>
+        <form id="loginForm">
+          <div class="field">
+            <label>Username</label>
+            <input class="input" type="text" id="username" required placeholder="Enter admin username">
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input class="input" type="password" id="password" required placeholder="••••••••">
+          </div>
+          <div id="loginError" class="notice warn hidden"></div>
+          <div style="height:12px"></div>
+          <button class="btn primary block" type="submit">Sign In</button>
+        </form>
+      </div>
+    </div>
+    <div class="footerbar">Offline first • localStorage • Professional dashboard</div>
+  </div>
+
+</div>
+<script src="app.js"></script>
+
+<script>
+if(requireAuth() || true){
+  setBrand();
+  document.getElementById('loginForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const u = document.getElementById('username').value.trim();
+    const p = document.getElementById('password').value.trim();
+    const err = document.getElementById('loginError');
+    if(u === 'admin' && p === '123456'){
+      localStorage.setItem('me_auth','1');
+      window.location.href='dashboard.html';
+    }else{
+      err.textContent='Username သို့မဟုတ် Password မှားယွင်းနေပါသည်။';
+      err.classList.remove('hidden');
+    }
+  });
+}
+</script>
+
+</body>
+</html>

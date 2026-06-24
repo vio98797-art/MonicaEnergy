@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Monica Energy - App Settings</title>
+<style>
+  :root{
+    --bg:#08111d;
+    --bg2:#0c1524;
+    --card:#111b2d;
+    --line:rgba(255,255,255,.10);
+    --line2:rgba(255,255,255,.16);
+    --text:#ecf2ff;
+    --muted:#a9b6cb;
+    --accent:#f5b04c;
+    --good:#5dd39e;
+    --warn:#ffcf5a;
+    --bad:#ff7c7c;
+    --shadow:0 18px 40px rgba(0,0,0,.28);
+    --radius:22px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(circle at top left, rgba(245,176,76,.08), transparent 20%),
+      radial-gradient(circle at right center, rgba(128,110,255,.08), transparent 18%),
+      linear-gradient(180deg, var(--bg) 0%, #06101b 100%);
+    min-height:100vh;
+  }
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1180px;margin:0 auto;padding:24px 16px 30px;}
+  .brand-bar{display:flex;justify-content:center;align-items:center;text-align:center;margin: 8px 0 18px;}
+  .brand .name{font-size:34px;font-weight:900;letter-spacing:1.6px;line-height:1.05;}
+  .brand .tag{margin-top:6px;font-size:15px;font-weight:700;color:var(--muted);}
+  .shell{
+    background: linear-gradient(180deg, rgba(14,22,36,.98), rgba(8,13,22,.98));
+    border:1px solid var(--line);
+    border-radius:28px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .hero{padding:24px 24px 16px;border-bottom:1px solid var(--line);}
+  .hero h1{margin:0 0 8px;font-size:28px;line-height:1.1;}
+  .hero p{margin:0;color:var(--muted);max-width:900px;line-height:1.5}
+  .content{padding:18px 18px 22px;}
+  .top-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+  .btn{
+    border:1px solid var(--line2);
+    background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+    color:var(--text);
+    border-radius:16px;
+    padding:12px 16px;
+    font-weight:900;
+    cursor:pointer;
+    transition:transform .15s ease, filter .15s ease, opacity .15s ease;
+    display:inline-flex;align-items:center;justify-content:center;
+  }
+  .btn:hover{transform:translateY(-1px);filter:brightness(1.04)}
+  .btn.primary{background:linear-gradient(180deg, rgba(245,176,76,.96), rgba(185,120,20,.95));color:#241600;border-color:transparent;}
+  .btn.good{background:linear-gradient(180deg, rgba(93,211,158,.95), rgba(35,140,95,.95));color:#0b1a13;border-color:transparent;}
+  .btn.secondary{background:rgba(255,255,255,.04)}
+  .btn.red{background:linear-gradient(180deg, rgba(165,82,72,.96), rgba(121,55,49,.96));color:#f8f3f1;border-color:rgba(255,191,191,.25)}
+  .btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}
+  .card{
+    background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px;
+    min-width:0;
+  }
+  .card h2{margin:0 0 12px;font-size:18px;line-height:1.2}
+  .card h3{margin:0 0 10px;font-size:15px;color:#dce6f7}
+  .field{display:flex;flex-direction:column;gap:8px;}
+  .field label{font-size:13px;font-weight:800;color:#dfe8fb;letter-spacing:.2px}
+  .input,.select,.textarea{
+    width:100%;
+    border-radius:16px;
+    border:1px solid var(--line2);
+    background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+    color:var(--text);
+    padding:13px 14px;
+    outline:none;
+    font-size:14px;
+  }
+  .textarea{min-height:220px;resize:vertical;font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;line-height:1.45}
+  .input::file-selector-button{border:0;border-radius:12px;padding:10px 12px;margin-right:12px;background:rgba(245,176,76,.16);color:var(--text);font-weight:800;cursor:pointer;}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .notice{border-radius:16px;padding:12px 14px;border:1px solid var(--line);color:#d7e1f3;background:rgba(255,255,255,.03);line-height:1.45;font-size:14px;}
+  .notice.good{border-color:rgba(93,211,158,.22);background:rgba(93,211,158,.08)}
+  .notice.warn{border-color:rgba(255,207,90,.22);background:rgba(255,207,90,.08)}
+  .notice.bad{border-color:rgba(255,124,124,.22);background:rgba(255,124,124,.08)}
+  .small{font-size:12px;color:var(--muted);line-height:1.45}
+  .footerbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;}
+  .pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.03)}
+  .dot{width:8px;height:8px;border-radius:99px;background:var(--warn)}
+  .dot.ok{background:var(--good)}
+  .dot.bad{background:var(--bad)}
+  .module-shell{margin-top:16px;}
+  .toolbar{display:grid;grid-template-columns: 1.3fr .7fr .7fr .7fr;gap:12px;align-items:end;}
+  .kpi-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+  .kpi{border:1px solid var(--line);border-radius:18px;padding:14px;background:rgba(255,255,255,.03)}
+  .kpi .k{display:block;font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  .kpi .v{display:block;margin-top:8px;font-size:24px;font-weight:900}
+  .preview-table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:18px;border:1px solid var(--line);table-layout:fixed;}
+  .preview-table th,.preview-table td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.08);border-right:1px solid rgba(255,255,255,.06);vertical-align:top;word-break:break-word;font-size:13px;}
+  .preview-table th{background:rgba(255,255,255,.04);text-align:left;color:#dce6f7;font-size:12px;text-transform:uppercase;letter-spacing:.35px;}
+  .preview-table tr:last-child td{border-bottom:0}
+  .preview-table th:last-child,.preview-table td:last-child{border-right:0}
+  .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;}
+  .split{display:grid;grid-template-columns: 1.08fr .92fr;gap:16px;margin-top:16px;}
+  .stack{display:flex;flex-direction:column;gap:12px}
+  .hidden{display:none !important}
+  .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  @media (max-width: 980px){
+    .toolbar,.grid,.split,.grid-3{grid-template-columns:1fr}
+    .kpi-row{grid-template-columns:repeat(2,minmax(0,1fr));}
+  }
+  @media (max-width: 640px){
+    .wrap{padding:16px 10px 24px}
+    .brand .name{font-size:28px}
+    .brand .tag{font-size:14px}
+    .hero{padding:18px 16px 14px}
+    .content{padding:14px}
+    .kpi-row{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand-bar">
+    <div class="brand">
+      <div class="name" data-brand-name>Monica Energy</div>
+      <div class="tag" data-brand-tag>Customer Management Service</div>
+    </div>
+  </div>
+
+  <div class="shell">
+    <div class="hero">
+      <h1>App Settings</h1>
+      <p>Set credit limit, edit fuel prices, backup data, and import JPG / XLSX / CSV / PDF / JSON records offline.</p>
+    </div>
+
+    <div class="content">
+      <div class="top-actions">
+        <a class="btn secondary" href="dashboard.html">Dashboard</a>
+        <a class="btn secondary" href="prices.html">Fuel Prices</a>
+        <a class="btn secondary" href="audit.html">Admin Audit</a>
+        <a class="btn secondary" href="ledger_view.html">Customer Registration</a>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h2>Credit Limit</h2>
+          <div class="field">
+            <label for="creditLimitInput">Default Limit (MMK)</label>
+            <input class="input" type="number" id="creditLimitInput" placeholder="50000">
+          </div>
+          <div style="height:12px"></div>
+          <div class="notice">When current balance exceeds this value, the app shows a warning.</div>
+        </div>
+
+        <div class="card">
+          <h2>Fuel Prices</h2>
+          <div id="priceInputs" class="grid-3"></div>
+        </div>
+
+        <div class="card">
+          <h2>Backup / Import</h2>
+          <div class="field">
+            <label for="importFile">Import Credit Paper Record</label>
+            <input class="input" type="file" id="importFile" accept=".jpg,.jpeg,.png,.xlsx,.csv,.pdf,.json,image/jpeg,image/png,application/pdf,application/json" />
+          </div>
+          <div style="height:12px"></div>
+          <div class="btn-row">
+            <button class="btn good" id="saveSettingsBtn" type="button">Save Settings</button>
+            <button class="btn secondary" id="exportBtn" type="button">Export Backup</button>
+            <button class="btn secondary" id="resetBtn" type="button">Reset Settings</button>
+          </div>
+          <div id="settingsMsg" style="margin-top:12px;"></div>
+        </div>
+
+        <div class="card">
+          <h2>App Info</h2>
+          <div class="notice good">
+            Brand: Monica Energy<br>
+            Mode: Offline<br>
+            Storage: localStorage<br>
+            Import supported: JSON backup and customer record files
+          </div>
+        </div>
+      </div>
+
+      <div class="card module-shell">
+        <h2>Offline Import Module</h2>
+        <div class="small" style="margin-bottom:12px;">Paste or import data here, preview it, then save it into localStorage.</div>
+
+        <div class="toolbar">
+          <div class="field">
+            <label for="fileInput">Import File</label>
+            <input id="fileInput" class="input" type="file" accept=".jpg,.jpeg,.png,.xlsx,.csv,.pdf,.json,image/jpeg,image/png,application/pdf,application/json" />
+          </div>
+          <div class="field">
+            <label for="sourceType">Source Type</label>
+            <select id="sourceType" class="select">
+              <option value="auto">Auto detect</option>
+              <option value="jpg">JPG / PNG OCR</option>
+              <option value="xlsx">Excel (.xlsx)</option>
+              <option value="csv">CSV</option>
+              <option value="pdf">PDF</option>
+              <option value="json">JSON</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="modeSelect">Import Mode</label>
+            <select id="modeSelect" class="select">
+              <option value="customers">Customers only</option>
+              <option value="package">Settings + Customers package</option>
+            </select>
+          </div>
+          <div class="btn-row">
+            <button id="parseBtn" class="btn primary" type="button">Parse & Preview</button>
+            <button id="importBtn" class="btn good" type="button" disabled>Import to App</button>
+            <button id="clearBtn" class="btn secondary" type="button">Clear</button>
+          </div>
+        </div>
+
+        <div class="grid" style="margin-top:16px;">
+          <div class="card">
+            <h2>Status</h2>
+            <div id="statusBox" class="notice warn">Waiting for a file.</div>
+            <div style="height:12px"></div>
+            <div class="kpi-row">
+              <div class="kpi"><span class="k">Rows</span><span class="v" id="kpiRows">0</span></div>
+              <div class="kpi"><span class="k">Customers</span><span class="v" id="kpiCustomers">0</span></div>
+              <div class="kpi"><span class="k">Settings</span><span class="v" id="kpiSettings">0</span></div>
+              <div class="kpi"><span class="k">Format</span><span class="v" id="kpiFormat">-</span></div>
+            </div>
+            <div style="height:12px"></div>
+            <div class="notice" id="libraryNotice">
+              CSV parsing works out of the box. OCR / Excel / PDF parsing needs local copies of the libraries loaded in this file.
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Parsed Data</h2>
+            <div class="small" style="margin-bottom:10px;">The preview below shows normalized rows before import.</div>
+            <div style="overflow:auto;max-height:340px;border-radius:18px;">
+              <table class="preview-table" id="previewTable">
+                <thead><tr><th>No data yet</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="split">
+          <div class="card stack">
+            <h2>Normalized JSON</h2>
+            <textarea id="jsonOutput" class="textarea mono" placeholder="Parsed JSON will appear here..."></textarea>
+            <div class="btn-row">
+              <button id="copyJsonBtn" class="btn secondary" type="button" disabled>Copy JSON</button>
+              <button id="downloadJsonBtn" class="btn secondary" type="button" disabled>Download JSON</button>
+            </div>
+          </div>
+
+          <div class="card stack">
+            <h2>Rules</h2>
+            <div class="notice good">
+              Supported customer fields: name, phone, creditLimit, totalCredit, totalPaid, currentBalance, salesHistory, repaymentHistory.
+            </div>
+            <div class="notice">
+              Import package format may include <span class="mono">settings</span> and <span class="mono">customers</span>. If both are present, settings are merged first and customers are replaced/updated.
+            </div>
+            <div class="notice warn">
+              Image, Excel, and PDF parsing are offline only when the corresponding libraries exist locally in the same folder or are already bundled into this page.
+            </div>
+            <div class="notice bad">
+              If OCR is unavailable, the module will still let you paste text manually into the JSON area and import it.
+            </div>
+          </div>
+        </div>
+
+        <div class="footerbar">
+          <div class="pill"><span class="dot" id="libDot"></span><span id="libStatus">Ready</span></div>
+          <div class="small">Storage keys: <span class="mono">monica_customers</span> and <span class="mono">monica_settings</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--
+  Offline library note:
+  To keep this module fully offline, place the library files locally and uncomment the script tags below.
+  Recommended names:
+    ./libs/tesseract.min.js
+    ./libs/xlsx.full.min.js
+    ./libs/pdf.min.js
+    ./libs/pdf.worker.min.js
+-->
+<!-- <script src="./libs/tesseract.min.js"></script> -->
+<!-- <script src="./libs/xlsx.full.min.js"></script> -->
+<!-- <script src="./libs/pdf.min.js"></script> -->
+
+<script>
+(() => {
+  const STORAGE_KEY = 'monica_customers';
+  const SETTINGS_KEY = 'monica_settings';
+  const AUTH_KEY = 'me_auth';
+
+  const DEFAULT_SETTINGS = {
+    creditLimit: 50000,
+    appName: 'Monica Energy',
+    companyTag: 'Customer Management Service',
+    fuelPrices: {
+      'Octane 92': 2790,
+      'Octane 95': 3015,
+      'Diesel': 2440,
+      'Premium Diesel': 2520
+    }
+  };
+
+  const el = (id) => document.getElementById(id);
+  const ui = {
+    creditLimitInput: el('creditLimitInput'),
+    priceInputs: el('priceInputs'),
+    importFile: el('importFile'),
+    saveSettingsBtn: el('saveSettingsBtn'),
+    exportBtn: el('exportBtn'),
+    resetBtn: el('resetBtn'),
+    settingsMsg: el('settingsMsg'),
+
+    fileInput: el('fileInput'),
+    sourceType: el('sourceType'),
+    modeSelect: el('modeSelect'),
+    parseBtn: el('parseBtn'),
+    importBtn: el('importBtn'),
+    clearBtn: el('clearBtn'),
+    copyJsonBtn: el('copyJsonBtn'),
+    downloadJsonBtn: el('downloadJsonBtn'),
+    statusBox: el('statusBox'),
+    previewTable: el('previewTable'),
+    jsonOutput: el('jsonOutput'),
+    kpiRows: el('kpiRows'),
+    kpiCustomers: el('kpiCustomers'),
+    kpiSettings: el('kpiSettings'),
+    kpiFormat: el('kpiFormat'),
+    libStatus: el('libStatus'),
+    libDot: el('libDot'),
+    libraryNotice: el('libraryNotice')
+  };
+
+  let parsedRows = [];
+  let parsedJson = null;
+  let parsedFormat = '-';
+
+  function fmt(n) { return Number(n || 0).toLocaleString(); }
+  function setStatus(text, kind = 'warn') {
+    ui.statusBox.className = `notice ${kind}`;
+    ui.statusBox.textContent = text;
+  }
+  function setLibraryStatus(text, ok = false, bad = false) {
+    ui.libStatus.textContent = text;
+    ui.libDot.className = `dot ${ok ? 'ok' : bad ? 'bad' : ''}`.trim();
+  }
+  function setMsg(html, kind = 'ok') {
+    ui.settingsMsg.innerHTML = `<div class="notice ${kind}">${html}</div>`;
+  }
+
+  function readSettings() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+      return {
+        ...DEFAULT_SETTINGS,
+        ...(raw || {}),
+        fuelPrices: { ...DEFAULT_SETTINGS.fuelPrices, ...((raw && raw.fuelPrices) || {}) }
+      };
+    } catch {
+      return { ...DEFAULT_SETTINGS };
+    }
+  }
+  function saveSettings(settings) {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  }
+  function sumAmount(items) { return (items || []).reduce((s, x) => s + Number(x.amount || 0), 0); }
+  function ensureHistoryDate(value) {
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+  }
+  function ensureCustomerShape(c) {
+    const salesHistory = Array.isArray(c.salesHistory) ? c.salesHistory : (Array.isArray(c.history) ? c.history : []);
+    const repaymentHistory = Array.isArray(c.repaymentHistory) ? c.repaymentHistory : [];
+    const totalCredit = Number(c.totalCredit || sumAmount(salesHistory));
+    const totalPaid = Number(c.totalPaid || sumAmount(repaymentHistory));
+    return {
+      id: c.id || ('cust_' + Date.now() + '_' + Math.floor(Math.random() * 9999)),
+      name: c.name || '',
+      phone: c.phone || '---',
+      totalCredit,
+      totalPaid,
+      currentBalance: Math.max(0, totalCredit - totalPaid),
+      creditLimit: Number(c.creditLimit || 0),
+      salesHistory: salesHistory.map(x => ({
+        date: ensureHistoryDate(x.date),
+        fuelType: x.fuelType || 'Fuel',
+        qty: x.qty || '',
+        amount: Number(x.amount || 0),
+        note: x.note || ''
+      })),
+      repaymentHistory: repaymentHistory.map(x => ({
+        date: ensureHistoryDate(x.date),
+        amount: Number(x.amount || 0),
+        note: x.note || ''
+      }))
+    };
+  }
+  function saveCustomers(list) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list.map(ensureCustomerShape)));
+  }
+  function readCustomers() {
+    try {
+      const list = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      const shaped = list.map(ensureCustomerShape);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(shaped));
+      return shaped;
+    } catch {
+      return [];
+    }
+  }
+  function requireAuth() {
+    if (localStorage.getItem(AUTH_KEY) !== '1') {
+      window.location.href = 'index.html';
+      return false;
+    }
+    return true;
+  }
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+  function normalizeKey(key) {
+    return String(key || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  }
+  function pick(row, aliases) {
+    const normalized = Object.entries(row).reduce((acc, [k, v]) => { acc[normalizeKey(k)] = v; return acc; }, {});
+    for (const a of aliases) {
+      const key = normalizeKey(a);
+      if (normalized[key] !== undefined && normalized[key] !== '') return normalized[key];
+    }
+    return '';
+  }
+  function toNumber(value) {
+    if (value === null || value === undefined) return 0;
+    const n = Number(String(value).replace(/[, ]/g, '').replace(/[^0-9.-]/g, ''));
+    return Number.isFinite(n) ? n : 0;
+  }
+  function guessDate(value) {
+    if (!value) return new Date().toISOString();
+    const v = String(value).trim();
+    const m1 = v.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+    if (m1) {
+      const d = Number(m1[1]);
+      const m = Number(m1[2]) - 1;
+      let y = Number(m1[3]);
+      if (y < 100) y += 2000;
+      const dt = new Date(y, m, d);
+      return isNaN(dt.getTime()) ? new Date().toISOString() : dt.toISOString();
+    }
+    const dt = new Date(v);
+    return isNaN(dt.getTime()) ? new Date().toISOString() : dt.toISOString();
+  }
+  function normalizeRow(row) {
+    const name = pick(row, ['name', 'customer name', 'customer', 'full name']) || '';
+    const phone = pick(row, ['phone', 'mobile', 'phone number', 'contact']) || '';
+    const creditLimit = toNumber(pick(row, ['credit limit', 'limit', 'max limit', 'default limit']));
+    const totalCredit = toNumber(pick(row, ['total credit', 'sale amount', 'sales amount', 'amount', 'debit', 'credit amount']));
+    const totalPaid = toNumber(pick(row, ['total paid', 'paid', 'repayment', 'payment']));
+    const currentBalanceRaw = toNumber(pick(row, ['current balance', 'balance']));
+    const fuelType = pick(row, ['fuel type', 'fuel', 'product']) || 'Fuel';
+    const qty = toNumber(pick(row, ['qty', 'quantity', 'liters', 'liter', 'gallon']));
+    const date = guessDate(pick(row, ['date', 'time', 'datetime', 'created at']));
+    const note = pick(row, ['note', 'remark', 'remarks', 'description']) || '';
+
+    const salesAmount = totalCredit || toNumber(pick(row, ['amount', 'sale amount', 'sales amount']));
+    const repaymentAmount = totalPaid || 0;
+    const salesHistory = salesAmount ? [{ date, fuelType, qty: qty || '', amount: salesAmount, note }] : [];
+    const repaymentHistory = repaymentAmount ? [{ date, amount: repaymentAmount, note: 'Imported repayment' }] : [];
+
+    const totalFromHist = salesHistory.reduce((s, x) => s + Number(x.amount || 0), 0);
+    const paidFromHist = repaymentHistory.reduce((s, x) => s + Number(x.amount || 0), 0);
+    const currentBalance = currentBalanceRaw || Math.max(0, totalFromHist - paidFromHist);
+
+    return ensureCustomerShape({
+      name,
+      phone,
+      creditLimit,
+      totalCredit: totalFromHist,
+      totalPaid: paidFromHist,
+      currentBalance,
+      salesHistory,
+      repaymentHistory
+    });
+  }
+  function csvParse(text) {
+    const rows = [];
+    const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').filter(line => line.trim() !== '');
+    if (!lines.length) return rows;
+    const splitLine = (line) => {
+      const result = [];
+      let cur = '';
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        const next = line[i + 1];
+        if (ch === '"') {
+          if (inQuotes && next === '"') { cur += '"'; i++; }
+          else { inQuotes = !inQuotes; }
+        } else if (ch === ',' && !inQuotes) {
+          result.push(cur.trim()); cur = '';
+        } else { cur += ch; }
+      }
+      result.push(cur.trim());
+      return result;
+    };
+    const headers = splitLine(lines[0]).map(h => h.trim());
+    for (let i = 1; i < lines.length; i++) {
+      const cells = splitLine(lines[i]);
+      const row = {};
+      headers.forEach((h, idx) => row[h] = (cells[idx] ?? '').trim());
+      rows.push(row);
+    }
+    return rows;
+  }
+  function textToRows(text) {
+    const lines = String(text || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').map(s => s.trim()).filter(Boolean);
+    if (!lines.length) return [];
+    const rows = [];
+    const splitter = /\s{2,}|\t|\|/;
+    const headerLine = lines[0];
+    const headers = headerLine.split(splitter).map(s => s.trim()).filter(Boolean);
+    if (headers.length >= 2) {
+      for (let i = 1; i < lines.length; i++) {
+        const parts = lines[i].split(splitter).map(s => s.trim()).filter(Boolean);
+        if (parts.length >= 2) {
+          const row = {};
+          headers.forEach((h, idx) => row[h] = parts[idx] || '');
+          rows.push(row);
+        }
+      }
+    }
+    if (rows.length) return rows;
+    const obj = {};
+    for (const line of lines) {
+      const idx = line.indexOf(':');
+      if (idx > 0) {
+        const key = line.slice(0, idx).trim();
+        const val = line.slice(idx + 1).trim();
+        obj[key] = val;
+      }
+    }
+    return Object.keys(obj).length ? [obj] : lines.map(line => ({ text: line }));
+  }
+  function parseRowsToCustomers(rows) { return rows.map(normalizeRow); }
+  function buildPackageFromRows(rows) { return { settings: readSettings(), customers: parseRowsToCustomers(rows) }; }
+  function renderPreviewTable(rows) {
+    if (!rows.length) {
+      ui.previewTable.innerHTML = '<thead><tr><th>No data yet</th></tr></thead><tbody></tbody>';
+      return;
+    }
+    const keys = Object.keys(rows[0] || {});
+    const thead = `<thead><tr>${keys.map(k => `<th>${escapeHtml(k)}</th>`).join('')}</tr></thead>`;
+    const tbody = `<tbody>${rows.slice(0, 40).map(row => `<tr>${keys.map(k => `<td>${escapeHtml(String(row[k] ?? ''))}</td>`).join('')}</tr>`).join('')}</tbody>`;
+    ui.previewTable.innerHTML = thead + tbody;
+  }
+  function updateKpis(rows, parsedPayload) {
+    ui.kpiRows.textContent = String(rows.length);
+    const customers = Array.isArray(parsedPayload?.customers) ? parsedPayload.customers.length : (Array.isArray(parsedPayload) ? parsedPayload.length : 0);
+    ui.kpiCustomers.textContent = String(customers);
+    ui.kpiSettings.textContent = parsedPayload?.settings ? '1' : '0';
+    ui.kpiFormat.textContent = parsedFormat.toUpperCase();
+  }
+  function updateLibraryHint() {
+    const libs = { tesseract: !!window.Tesseract, xlsx: !!window.XLSX, pdf: !!window.pdfjsLib };
+    const okCount = Object.values(libs).filter(Boolean).length;
+    if (okCount === 3) {
+      ui.libraryNotice.className = 'notice good';
+      ui.libraryNotice.textContent = 'All optional parsers are available locally. JPG OCR, XLSX, and PDF parsing can run offline in this page.';
+    } else if (okCount > 0) {
+      ui.libraryNotice.className = 'notice warn';
+      ui.libraryNotice.textContent = 'Some optional parsers are available. Missing libraries can be loaded locally to enable JPG OCR, XLSX, and PDF parsing.';
+    } else {
+      ui.libraryNotice.className = 'notice bad';
+      ui.libraryNotice.textContent = 'Only CSV and JSON are available right now. To enable JPG OCR, XLSX, and PDF parsing, add the local libraries next to this file.';
+    }
+  }
+  function detectFormat(file, manualSource) {
+    if (manualSource && manualSource !== 'auto') return manualSource;
+    const name = (file?.name || '').toLowerCase();
+    if (name.endsWith('.json')) return 'json';
+    if (name.endsWith('.csv')) return 'csv';
+    if (name.endsWith('.xlsx') || name.endsWith('.xls')) return 'xlsx';
+    if (name.endsWith('.pdf')) return 'pdf';
+    if (name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.png')) return 'jpg';
+    const type = (file?.type || '').toLowerCase();
+    if (type.includes('json')) return 'json';
+    if (type.includes('csv') || type.includes('text/plain')) return 'csv';
+    if (type.includes('pdf')) return 'pdf';
+    if (type.startsWith('image/')) return 'jpg';
+    return 'json';
+  }
+  function ensureXlsxAvailable() { if (!window.XLSX) throw new Error('XLSX library not found. Load ./libs/xlsx.full.min.js locally.'); }
+  function ensureTesseractAvailable() { if (!window.Tesseract) throw new Error('Tesseract library not found. Load ./libs/tesseract.min.js locally.'); }
+  function ensurePdfAvailable() { if (!window.pdfjsLib) throw new Error('PDF.js library not found. Load ./libs/pdf.min.js locally.'); }
+
+  async function parseJsonFile(file) {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if (Array.isArray(data)) {
+      const customers = data.map(ensureCustomerShape);
+      return { format: 'json', rows: customers.map(c => ({ name: c.name, phone: c.phone, creditLimit: c.creditLimit, totalCredit: c.totalCredit, totalPaid: c.totalPaid, currentBalance: c.currentBalance })), payload: customers };
+    }
+    if (data && typeof data === 'object') {
+      const customers = Array.isArray(data.customers) ? data.customers.map(ensureCustomerShape) : [];
+      const settings = data.settings ? { ...readSettings(), ...data.settings, fuelPrices: { ...readSettings().fuelPrices, ...((data.settings || {}).fuelPrices || {}) } } : null;
+      return { format: 'json', rows: customers.map(c => ({ name: c.name, phone: c.phone, creditLimit: c.creditLimit, totalCredit: c.totalCredit, totalPaid: c.totalPaid, currentBalance: c.currentBalance })), payload: { ...(settings ? { settings } : {}), customers } };
+    }
+    throw new Error('Unsupported JSON structure.');
+  }
+  async function parseCsvFile(file) {
+    const text = await file.text();
+    const rows = csvParse(text);
+    return { format: 'csv', rows, payload: parseRowsToCustomers(rows) };
+  }
+  async function parseXlsxFile(file) {
+    ensureXlsxAvailable();
+    const data = await file.arrayBuffer();
+    const workbook = XLSX.read(data, { type: 'array' });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+    return { format: 'xlsx', rows, payload: parseRowsToCustomers(rows) };
+  }
+  async function parseImageFile(file) {
+    ensureTesseractAvailable();
+    const { data } = await Tesseract.recognize(file, 'eng');
+    const text = data.text || '';
+    const rows = textToRows(text);
+    return { format: 'jpg', rows, payload: parseRowsToCustomers(rows), rawText: text };
+  }
+  async function parsePdfFile(file) {
+    ensurePdfAvailable();
+    if (window.pdfjsLib.GlobalWorkerOptions && window.pdfjsLib.GlobalWorkerOptions.workerSrc == null) {
+      try { pdfjsLib.GlobalWorkerOptions.workerSrc = './libs/pdf.worker.min.js'; } catch {}
+    }
+    const data = await file.arrayBuffer();
+    const doc = await pdfjsLib.getDocument({ data }).promise;
+    let text = '';
+    for (let i = 1; i <= doc.numPages; i++) {
+      const page = await doc.getPage(i);
+      const content = await page.getTextContent();
+      const pageText = content.items.map(item => item.str).join(' ');
+      text += pageText + '\n';
+    }
+    const rows = textToRows(text);
+    return { format: 'pdf', rows, payload: parseRowsToCustomers(rows), rawText: text };
+  }
+  async function parseSelectedFile() {
+    const file = ui.fileInput.files && ui.fileInput.files[0];
+    if (!file) {
+      setStatus('Please choose a file first.', 'warn');
+      return;
+    }
+    const format = detectFormat(file, ui.sourceType.value);
+    parsedFormat = format;
+    setLibraryStatus('Parsing...', true);
+    setStatus(`Reading ${file.name} as ${format.toUpperCase()}...`, 'warn');
+    ui.importBtn.disabled = true;
+    ui.copyJsonBtn.disabled = true;
+    ui.downloadJsonBtn.disabled = true;
+    try {
+      let result;
+      if (format === 'json') result = await parseJsonFile(file);
+      else if (format === 'csv') result = await parseCsvFile(file);
+      else if (format === 'xlsx') result = await parseXlsxFile(file);
+      else if (format === 'jpg') result = await parseImageFile(file);
+      else if (format === 'pdf') result = await parsePdfFile(file);
+      else throw new Error('Unsupported file format.');
+
+      parsedRows = result.rows || [];
+      const payload = result.payload;
+      parsedJson = (ui.modeSelect.value === 'package') ? buildPackageFromRows(parsedRows) : payload;
+      ui.jsonOutput.value = JSON.stringify(parsedJson, null, 2);
+      renderPreviewTable(parsedRows);
+      updateKpis(parsedRows, parsedJson);
+      setStatus(`Parsed successfully. ${parsedRows.length} row(s) ready for preview.`, 'good');
+      ui.importBtn.disabled = false;
+      ui.copyJsonBtn.disabled = false;
+      ui.downloadJsonBtn.disabled = false;
+      setLibraryStatus('Ready', true);
+    } catch (err) {
+      parsedRows = [];
+      parsedJson = null;
+      renderPreviewTable([]);
+      ui.jsonOutput.value = '';
+      updateKpis([], null);
+      ui.importBtn.disabled = true;
+      ui.copyJsonBtn.disabled = true;
+      ui.downloadJsonBtn.disabled = true;
+      setStatus(err.message || 'Failed to parse file.', 'bad');
+      setLibraryStatus('Needs local libraries', false, true);
+    }
+  }
+  function importToApp() {
+    if (!parsedJson) {
+      setStatus('Nothing to import yet.', 'warn');
+      return;
+    }
+    try {
+      if (ui.modeSelect.value === 'package' && parsedJson && typeof parsedJson === 'object' && !Array.isArray(parsedJson)) {
+        if (parsedJson.settings) {
+          const existing = readSettings();
+          const merged = {
+            ...existing,
+            ...parsedJson.settings,
+            fuelPrices: {
+              ...existing.fuelPrices,
+              ...(parsedJson.settings.fuelPrices || {})
+            }
+          };
+          saveSettings(merged);
+        }
+        if (Array.isArray(parsedJson.customers)) {
+          saveCustomers(parsedJson.customers.map(ensureCustomerShape));
+        }
+      } else {
+        const customers = Array.isArray(parsedJson) ? parsedJson.map(ensureCustomerShape) : [];
+        saveCustomers(customers);
+      }
+      setStatus('Import completed and saved to localStorage.', 'good');
+      setMsg('Import completed successfully.', 'good');
+    } catch (err) {
+      setStatus(err.message || 'Import failed.', 'bad');
+      setMsg('Import failed.', 'bad');
+    }
+  }
+  async function copyJson() {
+    if (!ui.jsonOutput.value) return;
+    try {
+      await navigator.clipboard.writeText(ui.jsonOutput.value);
+      setStatus('JSON copied to clipboard.', 'good');
+    } catch {
+      setStatus('Clipboard copy failed. You can manually select and copy the JSON.', 'warn');
+    }
+  }
+  function downloadJson() {
+    if (!ui.jsonOutput.value) return;
+    const blob = new Blob([ui.jsonOutput.value], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'monica_energy_import.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+  function clearAll() {
+    parsedRows = [];
+    parsedJson = null;
+    ui.fileInput.value = '';
+    ui.jsonOutput.value = '';
+    renderPreviewTable([]);
+    updateKpis([], null);
+    ui.importBtn.disabled = true;
+    ui.copyJsonBtn.disabled = true;
+    ui.downloadJsonBtn.disabled = true;
+    setStatus('Waiting for a file.', 'warn');
+    setLibraryStatus('Ready', true);
+  }
+
+  function renderSettingsForm() {
+    const s = readSettings();
+    ui.creditLimitInput.value = s.creditLimit;
+    ui.priceInputs.innerHTML = '';
+    Object.keys(s.fuelPrices).forEach(fuel => {
+      const wrap = document.createElement('div');
+      wrap.className = 'field';
+      wrap.innerHTML = `
+        <label>${escapeHtml(fuel)}</label>
+        <input class="input price-input" data-fuel="${escapeHtml(fuel)}" type="number" value="${Number(s.fuelPrices[fuel] || 0)}">
+      `;
+      ui.priceInputs.appendChild(wrap);
+    });
+  }
+
+  ui.saveSettingsBtn.addEventListener('click', function(){
+    const curr = readSettings();
+    curr.creditLimit = parseFloat(ui.creditLimitInput.value) || 0;
+    document.querySelectorAll('.price-input').forEach(inp => {
+      curr.fuelPrices[inp.dataset.fuel] = parseFloat(inp.value) || 0;
+    });
+    saveSettings(curr);
+    setMsg('Settings saved successfully.', 'good');
+  });
+
+  ui.resetBtn.addEventListener('click', function(){
+    saveSettings(DEFAULT_SETTINGS);
+    renderSettingsForm();
+    setMsg('Settings reset to defaults.', 'warn');
+  });
+
+  ui.exportBtn.addEventListener('click', function(){
+    const payload = { settings: readSettings(), customers: readCustomers() };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'monica_energy_backup.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  ui.importFile.addEventListener('change', async function(e){
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const format = detectFormat(file, 'auto');
+    ui.sourceType.value = format;
+    ui.fileInput.files = e.target.files;
+    setMsg(`Selected ${file.name}. Use Parse & Preview below.`, 'warn');
+  });
+
+  ui.parseBtn.addEventListener('click', parseSelectedFile);
+  ui.importBtn.addEventListener('click', importToApp);
+  ui.clearBtn.addEventListener('click', clearAll);
+  ui.copyJsonBtn.addEventListener('click', copyJson);
+  ui.downloadJsonBtn.addEventListener('click', downloadJson);
+  ui.fileInput.addEventListener('change', () => {
+    if (ui.fileInput.files && ui.fileInput.files[0]) {
+      const file = ui.fileInput.files[0];
+      const format = detectFormat(file, ui.sourceType.value);
+      parsedFormat = format;
+      ui.kpiFormat.textContent = format.toUpperCase();
+      setStatus(`Selected ${file.name}. Click Parse & Preview.`, 'warn');
+    }
+  });
+  ui.modeSelect.addEventListener('change', () => {
+    if (parsedRows.length) {
+      parsedJson = (ui.modeSelect.value === 'package') ? buildPackageFromRows(parsedRows) : parseRowsToCustomers(parsedRows);
+      ui.jsonOutput.value = JSON.stringify(parsedJson, null, 2);
+      updateKpis(parsedRows, parsedJson);
+    }
+  });
+  ui.jsonOutput.addEventListener('input', () => {
+    const txt = ui.jsonOutput.value.trim();
+    if (!txt) {
+      ui.importBtn.disabled = true;
+      return;
+    }
+    try {
+      const data = JSON.parse(txt);
+      parsedJson = data;
+      ui.importBtn.disabled = false;
+      setStatus('Manual JSON is ready to import.', 'good');
+    } catch {
+      ui.importBtn.disabled = true;
+    }
+  });
+
+  function setBrand() {
+    const n = document.querySelector('[data-brand-name]');
+    const t = document.querySelector('[data-brand-tag]');
+    const s = readSettings();
+    if (n) n.textContent = s.appName;
+    if (t) t.textContent = s.companyTag;
+  }
+
+  if (requireAuth()) {
+    setBrand();
+    renderSettingsForm();
+    updateLibraryHint();
+    setLibraryStatus('Ready', true);
+    setMsg('Ready.', 'good');
+  }
+
+  window.MonicaImportModule = {
+    readSettings,
+    saveSettings,
+    readCustomers,
+    saveCustomers,
+    ensureCustomerShape,
+    csvParse,
+    normalizeRow,
+    textToRows,
+    parseRowsToCustomers
+  };
+})();
+</script>
+</body>
+</html>

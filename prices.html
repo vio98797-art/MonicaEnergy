@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Monica Energy - Fuel Prices</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="page">
+  <div class="brand-bar">
+    <div class="brand">
+      <div class="name" data-brand-name>Monica Energy</div>
+      <div class="tag" data-brand-tag>Customer Management Service</div>
+    </div>
+  </div>
+
+  <div class="shell">
+    <div class="hero">
+      <h2>Fuel Prices</h2>
+      <p>Current fuel price display page. Admin can update these numbers in App Settings.</p>
+    </div>
+    <div class="section">
+      <div class="top-actions" style="margin-bottom:14px;">
+        <a class="btn secondary" href="dashboard.html">Dashboard</a>
+        <a class="btn secondary" href="settings.html">App Settings</a>
+        <a class="btn secondary" href="ledger_view.html">Customer Registration</a>
+        <a class="btn secondary" href="search.html">Customer Search</a>
+      </div>
+      <div class="grid cols-2" id="priceGrid"></div>
+    </div>
+  </div>
+
+</div>
+<script src="app.js"></script>
+
+<script>
+if(requireAuth()){
+  setBrand();
+  const settings = readSettings();
+  const grid = document.getElementById('priceGrid');
+  Object.entries(settings.fuelPrices).forEach(([name, price]) => {
+    const div = document.createElement('div');
+    div.className = 'stat';
+    div.innerHTML = `<span class="k">${name}</span><span class="v">${fmt(price)}</span><small>per liter/gallon</small>`;
+    grid.appendChild(div);
+  });
+}
+</script>
+
+</body>
+</html>

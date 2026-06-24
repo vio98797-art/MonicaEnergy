@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Monica Energy - Admin Audit</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="page">
+  <div class="brand-bar">
+    <div class="brand">
+      <div class="name" data-brand-name>Monica Energy</div>
+      <div class="tag" data-brand-tag>Customer Management Service</div>
+    </div>
+  </div>
+
+  <div class="shell">
+    <div class="hero">
+      <h2>Admin Audit</h2>
+      <p>Daily, monthly and yearly transaction audit with limit alerts and clear summaries.</p>
+    </div>
+    <div class="section">
+      <div class="top-actions" style="margin-bottom:14px;">
+        <a class="btn secondary" href="dashboard.html">Dashboard</a>
+        <a class="btn secondary" href="search.html">Customer Search</a>
+        <a class="btn secondary" href="repayment.html">Repayment</a>
+        <a class="btn secondary" href="settings.html">App Settings</a>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" data-mode="daily">Daily</button>
+        <button class="tab" data-mode="monthly">Monthly</button>
+        <button class="tab" data-mode="yearly">Yearly</button>
+        <button class="tab" data-mode="all">All</button>
+      </div>
+
+      <div style="height:14px"></div>
+      <div class="grid cols-4">
+        <div class="stat"><span class="k">Customers</span><span id="aCustomers" class="v">0</span><small>Total profiles</small></div>
+        <div class="stat"><span class="k">Credit</span><span id="aCredit" class="v">0</span><small>Selected period</small></div>
+        <div class="stat"><span class="k">Repayment</span><span id="aPaid" class="v">0</span><small>Selected period</small></div>
+        <div class="stat"><span class="k">Over Limit</span><span id="aOver" class="v">0</span><small>Current balance</small></div>
+      </div>
+
+      <div style="height:16px"></div>
+      <div class="card section tight">
+        <div class="title">Audit Report</div>
+        <div id="auditList" class="list-box"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script src="app.js"></script>
+
+<script>
+if(requireAuth()){
+  setBrand();
+  let mode = 'daily';
+
+  function buildEntries(customers){
+    const out = [];
+    customers.forEach(c => {
+      (c.salesHistory || []).forEach(x => out.push({
+        type:'credit',
+        customer:c.name,
+        customerId:c.id,
+        amount:Number(x.amount || 0),
+        note:x.note || '',
+        date:x.date,
+        fuelType:x.fuelType || 'Fuel',
+        qty:x.qty || ''
+      }));
+      (c.repaymentHistory || []).forEach(x => out.push({
+        type:'repayment',
+        customer:c.name,
+        customerId:c.id,
+        amount:Number(x.amount || 0),
+        note:x.note || '',
+        date:x.date
+      }));
+    });
+    return out;
+  }
+
+  function renderAudit(){
+    const customers = readCustomers();
+    const settings = readSettings();
+    const entries = buildEntries(customers).filter(e => matchesPeriod(e.date, mode));
+    const credit = entries.filter(e => e.type === 'credit').reduce((s,e) => s + e.amount, 0);
+    const paid = entries.filter(e => e.type === 'repayment').reduce((s,e) => s + e.amount, 0);
+    const overLimit = customers.filter(c => calcTotals(c).currentBalance > settings.creditLimit && settings.creditLimit > 0).length;
+
+    document.getElementById('aCustomers').textContent = fmt(customers.length);
+    document.getElementById('aCredit').textContent = fmt(credit);
+    document.getElementById('aPaid').textContent = fmt(paid);
+    document.getElementById('aOver').textContent = fmt(overLimit);
+
+    const list = document.getElementById('auditList');
+    list.innerHTML = '';
+    if(!entries.length){
+      list.innerHTML = '<div class="list-item"><strong>No records for selected period.</strong><div class="meta">Change the tab or create new records.</div></div>';
+      return;
+    }
+    entries.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(e => {
+      const row = document.createElement('div');
+      const c = customers.find(x => x.id === e.customerId);
+      const st = c ? creditStatus(c) : { exceeded:false };
+      row.className = 'list-item ' + (st.exceeded ? 'limit' : '');
+      row.innerHTML = e.type === 'repayment' ? `
+        <strong style="color:#79f1ba;">${e.customer} • Repayment</strong>
+        <div class="meta">Amount: -${fmt(e.amount)} ကျပ်<br>Date: ${displayDateTime(e.date)}<br>Note: ${e.note || '—'}</div>
+      ` : `
+        <strong style="color:#ffd59c;">${e.customer} • Credit</strong>
+        <div class="meta">Fuel: ${e.fuelType || 'Fuel'} • Qty: ${e.qty || '—'}<br>Amount: +${fmt(e.amount)} ကျပ်<br>Date: ${displayDateTime(e.date)}<br>Note: ${e.note || '—'}</div>
+      `;
+      list.appendChild(row);
+    });
+  }
+
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      mode = btn.dataset.mode;
+      renderAudit();
+    });
+  });
+  renderAudit();
+}
+</script>
+
+</body>
+</html>

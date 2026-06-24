@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Monica Energy - Repayment</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="page">
+  <div class="brand-bar">
+    <div class="brand">
+      <div class="name" data-brand-name>Monica Energy</div>
+      <div class="tag" data-brand-tag>Customer Management Service</div>
+    </div>
+  </div>
+
+  <div class="shell">
+    <div class="hero">
+      <h2>Repayment</h2>
+      <p>Search a customer, review balance, and save repayment records offline.</p>
+    </div>
+    <div class="section">
+      <div class="top-actions" style="margin-bottom:14px;">
+        <a class="btn secondary" href="dashboard.html">Dashboard</a>
+        <a class="btn secondary" href="search.html">Customer Search</a>
+        <a class="btn secondary" href="ledger_view.html">Customer Registration</a>
+        <a class="btn secondary" href="audit.html">Admin Audit</a>
+      </div>
+
+      <div class="grid cols-2">
+        <div class="card section tight">
+          <div class="title">Find Customer</div>
+          <div class="field"><input class="input" id="searchBar" placeholder="Search by name / phone / id"></div>
+          <button class="btn primary block" id="searchBtn" type="button">Search Customer</button>
+          <div id="foundBox" style="margin-top:14px;"></div>
+        </div>
+
+        <div class="card section tight">
+          <div class="title">Repayment Entry</div>
+          <div id="repayBox" class="notice">Search a customer first.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script src="app.js"></script>
+
+<script>
+if(requireAuth()){
+  setBrand();
+  let activeCustomerId = null;
+
+  function showCustomer(c){
+    const t = calcTotals(c);
+    const st = creditStatus(c);
+    document.getElementById('foundBox').innerHTML = `
+      <div class="customer-card ${st.exceeded ? 'alert' : ''}">
+        <h3><span>${c.name}</span><span class="balance">${formatMoney(t.currentBalance)}</span></h3>
+        <p>${c.phone || '---'}</p>
+        <p>${st.exceeded ? '<span class="badge red">LIMIT EXCEEDED</span>' : '<span class="badge green">READY</span>'}</p>
+      </div>
+    `;
+    document.getElementById('repayBox').innerHTML = `
+      <div class="field"><label>Current Balance</label><input class="input" value="${fmt(t.currentBalance)}" readonly></div>
+      <div class="field"><label>Repayment Amount</label><input class="input" type="number" id="repayAmount" placeholder="Enter repayment"></div>
+      <div class="field"><label>Note</label><input class="input" type="text" id="repayNote" placeholder="Optional note"></div>
+      <div class="btn-row">
+        <button class="btn green" id="saveRepayBtn" type="button">Save Repayment</button>
+        <button class="btn secondary" id="openHistoryBtn" type="button">Credit History</button>
+      </div>
+      <div id="repayMsg" style="margin-top:12px;"></div>
+    `;
+    document.getElementById('saveRepayBtn').addEventListener('click', saveRepayment);
+    document.getElementById('openHistoryBtn').addEventListener('click', function(){
+      window.location.href = 'credit_history.html?id=' + encodeURIComponent(activeCustomerId);
+    });
+  }
+
+  function searchCustomer(){
+    const q = document.getElementById('searchBar').value.trim().toLowerCase();
+    const list = readCustomers();
+    const pn = normalizePhone(q);
+    const c = list.find(x => String(x.name || '').toLowerCase().includes(q) || normalizePhone(x.phone).includes(pn) || String(x.id || '').toLowerCase().includes(q));
+    if(!c){
+      document.getElementById('foundBox').innerHTML = '<div class="notice warn">Customer not found.</div>';
+      document.getElementById('repayBox').innerHTML = '<div class="notice">Search a customer first.</div>';
+      activeCustomerId = null;
+      return;
+    }
+    activeCustomerId = c.id;
+    showCustomer(c);
+  }
+
+  function saveRepayment(){
+    if(!activeCustomerId) return;
+    const amount = parseFloat(document.getElementById('repayAmount').value) || 0;
+    const note = document.getElementById('repayNote').value.trim();
+    if(amount <= 0){ alert('Amount required.'); return; }
+    const list = readCustomers();
+    const idx = list.findIndex(x => x.id === activeCustomerId);
+    if(idx === -1) return;
+    list[idx].repaymentHistory = list[idx].repaymentHistory || [];
+    list[idx].repaymentHistory.push({ date:new Date().toISOString(), amount, note });
+    list[idx].totalPaid = Number(list[idx].totalPaid || 0) + amount;
+    list[idx] = ensureCustomerShape(list[idx]);
+    saveCustomers(list);
+    alert('Repayment saved.');
+    showCustomer(list[idx]);
+  }
+
+  document.getElementById('searchBtn').addEventListener('click', searchCustomer);
+  document.getElementById('searchBar').addEventListener('keydown', e => { if(e.key === 'Enter') searchCustomer(); });
+
+  const url = new URL(window.location.href);
+  const id = url.searchParams.get('id');
+  if(id){
+    const list = readCustomers();
+    const c = list.find(x => x.id === id);
+    if(c){
+      activeCustomerId = c.id;
+      document.getElementById('searchBar').value = c.name || c.phone || c.id;
+      showCustomer(c);
+    }
+  }
+}
+</script>
+
+</body>
+</html>
